@@ -17,15 +17,14 @@ ubigint::ubigint (unsigned long that): uvalue (that) {
     DEBUGF ('~', this << " -> " << uvalue)
     string s = to_string(uvalue);
     ubig_value = vector<udigit_t>();
-    for (char digit: that) {
+    for (char digit: s) {
         if (not isdigit(digit)) {
-            throw invalid_argument("ubigint::ubigint(" + that + ")");
+            throw invalid_argument("ubigint::ubigint(" + s + ")");
         }
         uvalue = uvalue * 10 + digit - '0';
         ubig_value.push_back(digit - '0');
     }
 }
-
 
 ubigint::ubigint (const string& that): uvalue(0) {
    DEBUGF ('~', "that = \"" << that << "\"");
@@ -37,6 +36,10 @@ ubigint::ubigint (const string& that): uvalue(0) {
       ubig_value.push_back(digit - '0');
 
    }
+}
+
+ubigint::ubigint (vector<udigit_t> that): ubig_value(that) {
+
 }
 
 ubigint ubigint::operator+ (const ubigint& that) const {
@@ -80,14 +83,21 @@ ubigint ubigint::operator+ (const ubigint& that) const {
 
 ubigint ubigint::operator- (const ubigint& that) const {
     if (*this < that) throw domain_error ("ubigint::operator-(a<b)");
+    if (ubig_value.size() > that.ubig_value.size()) {
+        min_length = that.ubig_value.size();
+
+    } else if (ubig_value.size() < that.ubig_value.size()) {
+        min_length = ubig_value.size();
+    } else {
+        min_length = ubig_value.size();
+    }
 
     ubigint res(0);
     unsigned int i = 0;
     int borrow = 0;
-    int curr = 0;
 
     while (i < loop_length)) {
-       curr = ubig_value.at(i) - borrow;
+       int curr = ubig_value.at(i) - borrow;
        if (curr < that.ubig_value.at(i)) {
            diff += 10;
            borrow = 1;
@@ -141,7 +151,7 @@ void ubigint::multiply_by_2() {
     vector<udigit_t> result;
     int sum = 0;
     int carry = 0;
-    for (int i = ubig_value.size() - 1; j >= 0; j--) {
+    for (int i = ubig_value.size() - 1; i >= 0; i--) {
         sum = (ubig_value.at(i) * 2) + carry;
         carry = sum / 10;
         result.insert(result.begin(), 1, sum % 10);
@@ -150,13 +160,13 @@ void ubigint::multiply_by_2() {
     if (carry > 0) {
         result.insert(result.begin(), 1, carry);
     }
-    uvalue = result;
+    ubig_value = result;
 }
 
 void ubigint::divide_by_2() {
     vector<udigit_t> result;
     int i = 0;
-    int temp = ubig_value.at(i)
+    int temp = ubig_value.at(i);
     while (ubig_value.at(i) < 2) {
         temp = temp * 10 + ubig_value.at(++i);
     }
@@ -165,7 +175,7 @@ void ubigint::divide_by_2() {
         result.insert(result.end(), 1, temp / 2);
         temp = (temp % 2) * 10 + ubig_value.at(++i);
     }
-    uvalue = result;
+    ubig_value = result;
 }
 
 struct quo_rem { ubigint quotient; ubigint remainder; };
@@ -201,10 +211,10 @@ ubigint ubigint::operator% (const ubigint& that) const {
 }
 
 bool ubigint::operator== (const ubigint& that) const {
-    if (that.ubig_value.size() != ubig_value.size) {
+    if (that.ubig_value.size() != ubig_value.size()) {
         return false;
     }
-    if (that.ubig_value.size() == ubig_value.size) {
+    if (that.ubig_value.size() == ubig_value.size()) {
         for (unsigned int i = 0; i < ubig_value.size(); i++) {
             if (that.ubig_value.at(i) != ubig_value.at(i)) {
                 return false;

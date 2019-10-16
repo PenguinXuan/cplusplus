@@ -28,6 +28,7 @@ class ubigint {
       ubigint() = default; // Need default ctor as well.
       ubigint (unsigned long);
       ubigint (const string&);
+      ubigint (vector<udigit_t>);
 
       ubigint operator+ (const ubigint&) const;
       ubigint operator- (const ubigint&) const;
