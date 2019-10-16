@@ -83,26 +83,27 @@ ubigint ubigint::operator+ (const ubigint& that) const {
 
 ubigint ubigint::operator- (const ubigint& that) const {
     if (*this < that) throw domain_error ("ubigint::operator-(a<b)");
+
+    vector<udigit_t> result;
+    int min_length = 0;
+    unsigned int i = 0;
+    int borrow = 0;
+    int min_length = 0;
     if (ubig_value.size() > that.ubig_value.size()) {
         min_length = that.ubig_value.size();
-
     } else if (ubig_value.size() < that.ubig_value.size()) {
         min_length = ubig_value.size();
     } else {
         min_length = ubig_value.size();
     }
 
-    ubigint res(0);
-    unsigned int i = 0;
-    int borrow = 0;
-
-    while (i < loop_length)) {
+    while (i < min_length) {
        int curr = ubig_value.at(i) - borrow;
        if (curr < that.ubig_value.at(i)) {
            diff += 10;
            borrow = 1;
        }
-       res.ubig_value.push_back(curr - that.ubig_value.at(i));
+       result.insert(,curr - that.ubig_value.at(i));
        i++;
     }
 
@@ -130,7 +131,7 @@ ubigint ubigint::operator* (const ubigint& that) const {
         int carry = 0;
         index_n2 = 0;
         for (int j = ubig_value.size() - 1; j >= 0; j--) {
-            sum = (ubig_value.at(j) * that.ubig_value(i)) + res.at(index_n1 + index_n2) + carry;
+            sum = (ubig_value.at(j) * that.ubig_value.at(i)) + res.at(index_n1 + index_n2) + carry;
             carry = sum / 10;
             res.at(index_n1 + index_n2) = sum % 10;
             index_n2++;
@@ -165,7 +166,7 @@ void ubigint::multiply_by_2() {
 
 void ubigint::divide_by_2() {
     vector<udigit_t> result;
-    int i = 0;
+    unsigned int i = 0;
     int temp = ubig_value.at(i);
     while (ubig_value.at(i) < 2) {
         temp = temp * 10 + ubig_value.at(++i);
