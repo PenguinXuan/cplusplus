@@ -41,7 +41,7 @@ ubigint ubigint::operator+ (const ubigint& that) const {
     if (ubig_value.size() < that.ubig_value.size()) {
         min_length = ubig_value.size();
     } else {
-        min_length = that.ubig_value.size());
+        min_length = that.ubig_value.size();
     }
     unsigned int i = 0;
     int carry = 0;
@@ -67,7 +67,10 @@ ubigint ubigint::operator+ (const ubigint& that) const {
     if (carry) {
         result.ubig_value.push_back(carry);
     }
-    while (result.ubig_value.size() > 0 and result.ubig_value.back() == 0) result.ubig_value.pop_back();
+    while (result.ubig_value.size() > 0 and result.ubig_value.back() == 0) {
+        result.ubig_value.pop_back();
+    }
+
     return result;
 
 }
@@ -93,7 +96,9 @@ ubigint ubigint::operator- (const ubigint& that) const {
         if (borrow > 0) {
             result.ubig_value.push_back(ubig_value.at(i)-1);
             borrow = 0;
-        } else {result.ubig_value.push_back(ubig_value.at(i));}
+        } else {
+            result.ubig_value.push_back(ubig_value.at(i));
+        }
         i++;
     }
 
@@ -223,7 +228,6 @@ bool ubigint::operator< (const ubigint& that) const {
 
     return false;
 }
-
 ostream& operator<< (ostream& out, const ubigint& that) {
     string output;
     for(unsigned int i = 0; i < that.ubig_value.size(); i++)
