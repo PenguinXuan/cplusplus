@@ -102,7 +102,7 @@ ubigint ubigint::operator- (const ubigint& that) const {
         i++;
     }
 
-    while (result.ubig_value.size() > 0and result.ubig_value.back() == 0){
+    while (result.ubig_value.size() > 0 and result.ubig_value.back() == 0){
         result.ubig_value.pop_back();
     }
     return result;
