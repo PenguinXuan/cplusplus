@@ -43,54 +43,60 @@ ubigint::ubigint (vector<udigit_t> that): ubig_value(that) {
 }
 
 ubigint ubigint::operator+ (const ubigint& that) const {
-    vector<udigit_t> ret_val;
-    unsigned int iterator_length = ubig_value.size();
-    unsigned char carry = 0;
-    unsigned char res = 0;
-    unsigned int first_iterator = ubig_value.size() - 1;
-    unsigned int second_iterator = that.ubig_value.size() - 1;
-    if (that.ubig_value.size() > ubig_value.size())
-    {
-        iterator_length = that.ubig_value.size();
+    ubigint sum(0);
+
+    // Right off the bat, let's handle the case where one or more of the operands == 0:
+    if (ubig_value.size() == 0) {
+        for (int i = 0; i < that.ubig_value.size(); i++) {
+            sum.ubig_value.push_back(that.ubig_value.at(i));
+        }
+
+        return sum;
+    } else if (that.ubig_value.size() == 0) {
+        for (int i = 0; i < ubig_value.size(); i++) {
+            sum.ubig_value.push_back(ubig_value.at(i));
+        }
+
+        return sum;
     }
-    for(unsigned int i = 0; i < iterator_length; i++)
-    {
-        if(static_cast <unsigned int> (i) >= that.ubig_value.size())
-        {
-            res = ubig_value.at(first_iterator) + carry;
-            first_iterator--;
-        }
-        else if(static_cast <unsigned int> (i)  >= ubig_value.size())
-        {
-            res = that.ubig_value.at(second_iterator) + carry;
-            second_iterator--;
-        }
-        else
-        {
-            res = ubig_value.at(first_iterator) + that.ubig_value.at(second_iterator) + carry;
-            first_iterator--;
-            second_iterator--;
-        }
-        if(res >= 10)
-        {
+
+    int minSize = (ubig_value.size() < that.ubig_value.size() ? ubig_value.size() : that.ubig_value.size());
+    int i = 0;        // The index in the vectors
+    int carry = 0;    // The carry value (if any) - should be reset to 0 on use
+    int digitSum = 0; // digitSum represents the sum of two digits (eg, ubig_value.at(0) + that.ubig_value.at(0))
+    while (i < minSize or carry > 0) {
+        // Ugly logic, but avoids accidentally runnig off the end of an operand that's shorter than the other
+        if (i < ubig_value.size()) digitSum += ubig_value.at(i);
+        if (i < that.ubig_value.size()) digitSum += that.ubig_value.at(i);
+        digitSum += carry;
+        carry = 0;
+
+        // Check if a carry needs to happen
+        if (digitSum > 9) {
             carry = 1;
-            res -= 10;
+            digitSum = digitSum % 10;
         }
-        else
-        {
-            carry = 0;
+
+        sum.ubig_value.push_back(digitSum);
+        digitSum = 0;
+        i++;
+    }
+
+    // Should also push_back extra digits if one operand is longer than the other
+    if (ubig_value.size() > that.ubig_value.size()) {
+        while (i < ubig_value.size()) {
+            sum.ubig_value.push_back(ubig_value.at(i));
+            i++;
         }
-        ret_val.insert(ret_val.begin(), 1, res);
+    } else {
+        while (i < that.ubig_value.size()) {
+            sum.ubig_value.push_back(that.ubig_value.at(i));
+            i++;
+        }
     }
-    if(carry == 1)
-    {
-        ret_val.insert(ret_val.begin(), 1, 1);
-    }
-    if(ret_val.size() == 0)
-    {
-        ret_val.insert(ret_val.begin(), 1, 0);
-    }
-    return ubigint(ret_val);
+
+    while (sum.ubig_value.size() > 0 and sum.ubig_value.back() == 0) sum.ubig_value.pop_back();
+    return sum;
 }
 
 ubigint ubigint::operator- (const ubigint& that) const {
