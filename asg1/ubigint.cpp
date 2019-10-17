@@ -45,7 +45,7 @@ ubigint::ubigint (vector<udigit_t> that): ubig_value(that) {
 ubigint ubigint::operator+ (const ubigint& that) const {
     ubigint result(0);
     int min_length = (ubig_value.size() < that.ubig_value.size() ? ubig_value.size() : that.ubig_value.size());
-    int i = 0;
+    unsigned int i = 0;
     int carry = 0;
 
     for (; i < min_length; i++) {
@@ -75,10 +75,11 @@ ubigint ubigint::operator+ (const ubigint& that) const {
 ubigint ubigint::operator- (const ubigint& that) const {
     if (*this < that) throw domain_error ("ubigint::operator-(a<b)");
     ubigint result(0);
+    unsigned int i = 0;
     int borrow = 0;
     int diff  = 0;
 
-    for (int i = 0; i < that.ubig_value.size(); i++)  {
+    for (; i < that.ubig_value.size(); i++)  {
         diff = ubig_value.at(i) - borrow;
         borrow = 0;
 
