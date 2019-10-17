@@ -45,9 +45,10 @@ ubigint::ubigint (vector<udigit_t> that): ubig_value(that) {
 ubigint ubigint::operator+ (const ubigint& that) const {
     ubigint result(0);
     int min_length = (ubig_value.size() < that.ubig_value.size() ? ubig_value.size() : that.ubig_value.size());
+    int i = 0
     int carry = 0;
 
-    for (int i = 0; i < min_length; i++) {
+    for (; i < min_length; i++) {
         int sum = ubig_value.at(i) + that.ubig_value.at(i) + carry;
         result.ubig_value.push_back(sum % 10);
         carry = sum / 10;
