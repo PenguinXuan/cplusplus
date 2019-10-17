@@ -1,4 +1,6 @@
 // $Id: ubigint.h,v 1.11 2016-03-24 19:43:57-07 - - $
+//By: Zhuoxuan Wang (zwang437@ucsc.edu)
+//and Xiong Lou (xlou2@ucsc.edu)
 
 #ifndef __UBIGINT_H__
 #define __UBIGINT_H__
