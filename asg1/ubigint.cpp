@@ -37,7 +37,12 @@ ubigint::ubigint (const string& that): uvalue(0) {
 
 ubigint ubigint::operator+ (const ubigint& that) const {
     ubigint result(0);
-    unsigned int min_length = (ubig_value.size() < that.ubig_value.size() ? ubig_value.size() : that.ubig_value.size());
+    unsigned int min_length = 0;
+    if (ubig_value.size() < that.ubig_value.size()) {
+        min_length = ubig_value.size();
+    } else {
+        min_length = that.ubig_value.size());
+    }
     unsigned int i = 0;
     int carry = 0;
     int sum = 0;
@@ -88,10 +93,7 @@ ubigint ubigint::operator- (const ubigint& that) const {
         if (borrow > 0) {
             result.ubig_value.push_back(ubig_value.at(i)-1);
             borrow = 0;
-        } else {
-            result.ubig_value.push_back(ubig_value.at(i));
-        }
-
+        } else {result.ubig_value.push_back(ubig_value.at(i));}
         i++;
     }
 
