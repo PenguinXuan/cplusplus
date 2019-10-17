@@ -43,83 +43,64 @@ ubigint::ubigint (vector<udigit_t> that): ubig_value(that) {
 }
 
 ubigint ubigint::operator+ (const ubigint& that) const {
-    ubigint res(0);
-    unsigned int min_length = 0;
-
-    if (ubig_value.size() > that.ubig_value.size()) {
-        min_length = that.ubig_value.size();
-
-    } else if (ubig_value.size() < that.ubig_value.size()) {
-        min_length = ubig_value.size();
-    } else {
-        min_length = ubig_value.size();
-    }
-    unsigned int i = 0;
+    ubigint result(0);
+    int min_length = (ubig_value.size() < that.ubig_value.size() ? ubig_value.size() : that.ubig_value.size());
     int carry = 0;
 
-    while (i < min_length or carry > 0) {
-        carry += ubig_value.at(i) + that.ubig_value.at(i);
-        res.ubig_value.push_back(carry % 10);
-        carry /= 10;
+    for (int i = 0; i < min_length; i++) {
+        int sum = ubig_value.at(i) + that.ubig_value.at(i) + carry;
+        result.ubig_value.push_back(sum % 10);
+        carry = sum / 10;
     }
 
     if (ubig_value.size() > that.ubig_value.size()) {
         while (i < ubig_value.size()) {
-            res.ubig_value.push_back(ubig_value.at(i));
+            result.ubig_value.push_back(ubig_value.at(i));
             i++;
         }
     } else {
         while (i < that.ubig_value.size()) {
-            res.ubig_value.push_back(that.ubig_value.at(i));
+            result.ubig_value.push_back(that.ubig_value.at(i));
             i++;
         }
     }
-    while (res.ubig_value.size() > 0) {
-        res.ubig_value.pop_back();
+    if (carry) {
+        result.ubig_value.push_back(carry);
     }
 
-   return res;
+   return result;
 }
 
 ubigint ubigint::operator- (const ubigint& that) const {
     if (*this < that) throw domain_error ("ubigint::operator-(a<b)");
-
-    vector<udigit_t> result;
-    int min_length = 0;
-    unsigned int i = 0;
+    ubigint result(0);
     int borrow = 0;
-    int min_length = 0;
-    if (ubig_value.size() > that.ubig_value.size()) {
-        min_length = that.ubig_value.size();
-    } else if (ubig_value.size() < that.ubig_value.size()) {
-        min_length = ubig_value.size();
-    } else {
-        min_length = ubig_value.size();
+    int diff  = 0;
+
+    for (int i = 0; i < that.ubig_value.size(); i++)  {
+        diff = ubig_value.at(i) - borrow;
+        borrow = 0;
+
+        if (diff  < that.ubig_value.at(i)) {
+            diff += 10;
+            borrow = 1;
+        }
+        result.ubig_value.push_back(diff - that.ubig_value.at(i));
+        i++;
+    }
+     while (i < ubig_value.size()) {
+        if (borrow > 0) {
+            result.ubig_value.push_back(ubig_value.at(i)-1);
+            borrow = 0;
+        } else {
+            result.ubig_value.push_back(ubig_value.at(i));
+        }
+
+        i++;
     }
 
-    while (i < min_length) {
-       int curr = ubig_value.at(i) - borrow;
-       if (curr < that.ubig_value.at(i)) {
-           diff += 10;
-           borrow = 1;
-       }
-       result.insert(,curr - that.ubig_value.at(i));
-       i++;
-    }
-
-    while (i < ubig_value.size()) {
-       if (borrow > 0) {
-           res.ubig_value.push_back(ubig_value.at(i) - 1);
-           borrow = 0;
-       } else {
-           res.ubig_value.push_back(ubig_value.at(i));
-       }
-       i++;
-    }
-    while (res.ubig_value.size() > 0) {
-        res.ubig_value.pop_back();
-    }
-    return res;
+    while (result.ubig_value.size() > 0 and result.ubig_value.back() == 0) result.ubig_value.pop_back();
+    return result;
 }
 
 ubigint ubigint::operator* (const ubigint& that) const {
