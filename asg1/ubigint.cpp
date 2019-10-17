@@ -102,7 +102,9 @@ ubigint ubigint::operator- (const ubigint& that) const {
         i++;
     }
 
-    while (result.ubig_value.size() > 0 and result.ubig_value.back() == 0) result.ubig_value.pop_back();
+    while (result.ubig_value.size() > 0and result.ubig_value.back() == 0){
+        result.ubig_value.pop_back();
+    }
     return result;
 }
 
@@ -110,9 +112,10 @@ ubigint ubigint::operator* (const ubigint& that) const {
     vector<udigit_t> res(that.ubig_value.size() + ubig_value.size(), 0);
     int index_n1 = 0;
     int index_n2 = 0;
+    int carry  = 0;
     int sum = 0;
     for (int i = that.ubig_value.size() - 1; i >= 0; i--) {
-        int carry = 0;
+        carry = 0;
         index_n2 = 0;
         for (int j = ubig_value.size() - 1; j >= 0; j--) {
             sum = (ubig_value.at(j) * that.ubig_value.at(i)) + res.at(index_n1 + index_n2) + carry;
@@ -230,7 +233,7 @@ bool ubigint::operator< (const ubigint& that) const {
 }
 ostream& operator<< (ostream& out, const ubigint& that) {
     string output;
-    for(unsigned int i = 0; i < that.ubig_value.size(); i++)
+    for(unsigned int i = 0;i<that.ubig_value.size();i++)
     {
         output.append(1, static_cast <char> (that.ubig_value.at(i) + '0'));
     }
