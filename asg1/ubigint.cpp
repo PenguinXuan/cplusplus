@@ -43,34 +43,54 @@ ubigint::ubigint (vector<udigit_t> that): ubig_value(that) {
 }
 
 ubigint ubigint::operator+ (const ubigint& that) const {
-    ubigint result(0);
-    int min_length = (ubig_value.size() < that.ubig_value.size() ? ubig_value.size() : that.ubig_value.size());
-    int i = 0;
-    int carry = 0;
-    int sum = 0;
-
-    for (; i < min_length; i++) {
-        int sum = ubig_value.at(i) + that.ubig_value.at(i) + carry;
-        result.ubig_value.push_back(sum % 10);
-        carry = sum / 10;
+    vector<udigit_t> ret_val;
+    unsigned int iterator_length = ubig_value.size();
+    unsigned char carry = 0;
+    unsigned char res = 0;
+    unsigned int first_iterator = ubig_value.size() - 1;
+    unsigned int second_iterator = that.ubig_value.size() - 1;
+    if (that.ubig_value.size() > ubig_value.size())
+    {
+        iterator_length = that.ubig_value.size();
     }
-
-    if (ubig_value.size() > that.ubig_value.size()) {
-        while (i < ubig_value.size()) {
-            result.ubig_value.push_back(ubig_value.at(i));
-            i++;
+    for(unsigned int i = 0; i < iterator_length; i++)
+    {
+        if(static_cast <unsigned int> (i) >= that.ubig_value.size())
+        {
+            res = ubig_value.at(first_iterator) + carry;
+            first_iterator--;
         }
-    } else {
-        while (i < that.ubig_value.size()) {
-            result.ubig_value.push_back(that.ubig_value.at(i));
-            i++;
+        else if(static_cast <unsigned int> (i)  >= ubig_value.size())
+        {
+            res = that.ubig_value.at(second_iterator) + carry;
+            second_iterator--;
         }
+        else
+        {
+            res = ubig_value.at(first_iterator) + that.ubig_value.at(second_iterator) + carry;
+            first_iterator--;
+            second_iterator--;
+        }
+        if(res >= 10)
+        {
+            carry = 1;
+            res -= 10;
+        }
+        else
+        {
+            carry = 0;
+        }
+        ret_val.insert(ret_val.begin(), 1, res);
     }
-    if (carry) {
-        result.ubig_value.push_back(carry);
+    if(carry == 1)
+    {
+        ret_val.insert(ret_val.begin(), 1, 1);
     }
-    while (result.ubig_value.size() > 0 and result.ubig_value.back() == 0) result.ubig_value.pop_back();
-    return result;
+    if(ret_val.size() == 0)
+    {
+        ret_val.insert(ret_val.begin(), 1, 0);
+    }
+    return ubigint(ret_val);
 }
 
 ubigint ubigint::operator- (const ubigint& that) const {
