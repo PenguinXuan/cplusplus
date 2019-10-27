@@ -37,13 +37,17 @@ class inode_state {
    friend ostream& operator<< (ostream& out, const inode_state&);
    private:
       inode_ptr root {nullptr};
-      inode_ptr cwd {nullptr};
+
+      void split(const std::string& s, std::vector<std::string>& sv, const char delim);
       string prompt_ {"% "};
    public:
+      inode_ptr cwd {nullptr};
       inode_state (const inode_state&) = delete; // copy ctor
       inode_state& operator= (const inode_state&) = delete; // op=
       inode_state();
-      directory_ptr get_cur_dict();
+      directory_ptr get_cur_dir();
+      inode_ptr get_inode_from_path(const string& path);
+      directory_ptr get_dir_from_path(const string& path);
       const string& prompt() const;
 };
 
@@ -145,6 +149,7 @@ class plain_file: public base_file {
 
 class directory: public base_file {
    friend class inode;
+   friend class inode_state;
    private:
       // Must be a map, not unordered_map, so printing is lexicographic
       map<string,inode_ptr> dirents;

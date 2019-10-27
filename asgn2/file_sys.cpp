@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <unordered_map>
-
+#include <sstream>
 using namespace std;
 
 #include "debug.h"
@@ -31,8 +31,46 @@ inode_state::inode_state() {
     DEBUGF ('i', "root = " << root << ", cwd = " << cwd
           << ", prompt = \"" << prompt() << "\"");
 }
-directory_ptr inode_state::get_cur_dict() {
+directory_ptr inode_state::get_cur_dir() {
     return dynamic_pointer_cast<directory> (cwd->contents);
+}
+inode_ptr  inode_state::get_inode_from_path(const string& path) {
+    std::vector<std::string> sv;
+    split(path, sv, '/');
+    inode_ptr cursor = cwd;
+    if(path.size() > 0 && path.at(0) == '/') {
+        cursor = root;
+    }
+    size_t i = 0;
+
+    for(; i < sv.size(); i++) {
+        if(sv.at(i).empty() || sv.at(i) == ".") {
+            continue;
+        }
+        directory_ptr dir = cursor->get_dict();
+        if(dir->dirents.count(sv.at(i)) > 0) {
+            cursor = dir->dirents[sv.at(i)];
+        } else {
+            return nullptr;
+        }
+        cout << sv.at(i) << endl;
+    }
+    return cursor;
+}
+directory_ptr  inode_state::get_dir_from_path(const string& path) {
+    inode_ptr node = get_inode_from_path(path);
+    return node == nullptr ? nullptr : node->get_dict();
+};
+void inode_state::split(const std::string& s, std::vector<std::string>& sv, const char delim = ' ') {
+    sv.clear();
+    std::istringstream iss(s);
+    std::string temp;
+
+    while (std::getline(iss, temp, delim)) {
+        sv.emplace_back(std::move(temp));
+    }
+
+    return;
 }
 const string& inode_state::prompt() const { return prompt_; }
 

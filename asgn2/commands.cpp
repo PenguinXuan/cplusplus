@@ -45,6 +45,15 @@ void fn_cat (inode_state& state, const wordvec& words){
 }
 
 void fn_cd (inode_state& state, const wordvec& words){
+   if(words.size() > 1) {
+       inode_ptr node= state.get_inode_from_path(words[1]);
+       if(node != nullptr) {
+           state.cwd = node;
+           return;
+       }
+   }
+   cout << "No such directory." << endl;
+
    DEBUGF ('c', state);
    DEBUGF ('c', words);
 }
