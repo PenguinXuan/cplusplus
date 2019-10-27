@@ -21,6 +21,8 @@ class base_file;
 class plain_file;
 class directory;
 using inode_ptr = shared_ptr<inode>;
+using directory_ptr = shared_ptr<directory>;
+using plain_file_ptr = shared_ptr<plain_file>;
 using base_file_ptr = shared_ptr<base_file>;
 ostream& operator<< (ostream&, file_type);
 
@@ -41,6 +43,7 @@ class inode_state {
       inode_state (const inode_state&) = delete; // copy ctor
       inode_state& operator= (const inode_state&) = delete; // op=
       inode_state();
+      directory_ptr get_cur_dict();
       const string& prompt() const;
 };
 
@@ -62,10 +65,14 @@ class inode {
    private:
       static int next_inode_nr;
       int inode_nr;
+      file_type f_type;
       base_file_ptr contents;
    public:
       inode (file_type);
       int get_inode_nr() const;
+      size_t size();
+      inode_ptr get_ptr();
+      directory_ptr get_dict();
 };
 
 
@@ -135,6 +142,7 @@ class plain_file: public base_file {
 //    a dirent with that name exists.
 
 class directory: public base_file {
+   friend class inode;
    private:
       // Must be a map, not unordered_map, so printing is lexicographic
       map<string,inode_ptr> dirents;
@@ -142,6 +150,8 @@ class directory: public base_file {
          return "directory";
       }
    public:
+      directory(inode_ptr inodePtr);
+      void ls();
       virtual size_t size() const override;
       virtual void remove (const string& filename) override;
       virtual inode_ptr mkdir (const string& dirname) override;

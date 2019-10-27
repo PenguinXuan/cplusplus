@@ -26,10 +26,15 @@ ostream& operator<< (ostream& out, file_type type) {
 }
 
 inode_state::inode_state() {
-   DEBUGF ('i', "root = " << root << ", cwd = " << cwd
+    inode * node = new inode(file_type::DIRECTORY_TYPE);
+    root = node ->get_ptr();
+    cwd = root;
+    DEBUGF ('i', "root = " << root << ", cwd = " << cwd
           << ", prompt = \"" << prompt() << "\"");
 }
-
+directory_ptr inode_state::get_cur_dict() {
+    return dynamic_pointer_cast<directory> (cwd->contents);
+}
 const string& inode_state::prompt() const { return prompt_; }
 
 ostream& operator<< (ostream& out, const inode_state& state) {
@@ -39,12 +44,14 @@ ostream& operator<< (ostream& out, const inode_state& state) {
 }
 
 inode::inode(file_type type): inode_nr (next_inode_nr++) {
-   switch (type) {
+    f_type = type;
+    inode_ptr ptr(this);
+    switch (type) {
       case file_type::PLAIN_TYPE:
            contents = make_shared<plain_file>();
            break;
       case file_type::DIRECTORY_TYPE:
-           contents = make_shared<directory>();
+           contents = make_shared<directory>(ptr);
            break;
    }
    DEBUGF ('i', "inode " << inode_nr << ", type = " << type);
@@ -54,7 +61,31 @@ int inode::get_inode_nr() const {
    DEBUGF ('i', "inode = " << inode_nr);
    return inode_nr;
 }
-
+size_t inode::size() {
+    return contents->size();
+}
+directory_ptr inode::get_dict() {
+    if(f_type == file_type::DIRECTORY_TYPE) {
+        return dynamic_pointer_cast<directory> (contents);
+    } else {
+        return nullptr;
+    }
+}
+inode_ptr inode::get_ptr() {
+    directory_ptr dict = get_dict();
+    if(dict != nullptr) {
+        return dict->dirents.at(".");
+    } else {
+        return nullptr;
+    }
+}
+void directory::ls() {
+    map<string,inode_ptr>::iterator itr;
+    for (itr = dirents.begin(); itr != dirents.end(); ++itr) {
+        printf("%6d  %6zu  ", itr->second->get_inode_nr(), itr->second->size());
+        cout<< "  "<< itr->first<< "\n";
+    }
+}
 
 file_error::file_error (const string& what):
             runtime_error (what) {
@@ -97,11 +128,14 @@ void plain_file::writefile (const wordvec& words) {
 }
 
 size_t directory::size() const {
-   size_t size {0};
+   size_t size = dirents.size();
    DEBUGF ('i', "size = " << size);
    return size;
 }
-
+directory::directory(inode_ptr node) {
+    dirents["."] = node;
+    dirents[".."] = node;
+}
 void directory::remove (const string& filename) {
    DEBUGF ('i', filename);
 }
