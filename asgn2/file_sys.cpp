@@ -26,7 +26,7 @@ ostream& operator<< (ostream& out, file_type type) {
 }
 
 inode_state::inode_state() {
-    root = make_shared<inode>(file_type::DIRECTORY_TYPE);
+    root = (new inode(file_type::DIRECTORY_TYPE)) ->get_ptr();
     cwd = root;
     DEBUGF ('i', "root = " << root << ", cwd = " << cwd
           << ", prompt = \"" << prompt() << "\"");
@@ -164,7 +164,7 @@ inode_ptr directory::mkdir (const string& dirname) {
        printf("directory exists.\n");
        return dirents[dirname];
    }
-   inode_ptr ptr = make_shared<inode>(file_type::DIRECTORY_TYPE);
+   inode_ptr ptr = (new inode(file_type::DIRECTORY_TYPE)) ->get_ptr();
    dirents[dirname] = ptr;
    DEBUGF ('i', dirname);
    return ptr;
