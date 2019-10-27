@@ -53,7 +53,6 @@ inode_ptr  inode_state::get_inode_from_path(const string& path) {
         } else {
             return nullptr;
         }
-        cout << sv.at(i) << endl;
     }
     return cursor;
 }
