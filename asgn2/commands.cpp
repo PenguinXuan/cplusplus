@@ -2,6 +2,9 @@
 
 #include "commands.h"
 #include "debug.h"
+#include <string>
+#include <iostream>
+#include <sstream>
 
 command_hash cmd_hash {
    {"cat"   , fn_cat   },
@@ -45,17 +48,19 @@ void fn_cat (inode_state& state, const wordvec& words){
 }
 
 void fn_cd (inode_state& state, const wordvec& words){
-   if(words.size() > 1) {
+
+    DEBUGF ('c', state);
+    DEBUGF ('c', words);
+    if(words.size() > 1) {
        inode_ptr node= state.get_inode_from_path(words[1]);
        if(node != nullptr) {
            state.cwd = node;
+           state.update_pwd(words[1]);
            return;
        }
-   }
-   cout << "No such directory." << endl;
+    }
+    throw command_error ("No such directory.");
 
-   DEBUGF ('c', state);
-   DEBUGF ('c', words);
 }
 
 void fn_echo (inode_state& state, const wordvec& words){
@@ -94,11 +99,15 @@ void fn_mkdir (inode_state& state, const wordvec& words){
 }
 
 void fn_prompt (inode_state& state, const wordvec& words){
+   std::stringstream buffer;
+   buffer << word_range (words.cbegin() + 1, words.cend());
+   state.update_prompt(buffer.str());
    DEBUGF ('c', state);
    DEBUGF ('c', words);
 }
 
 void fn_pwd (inode_state& state, const wordvec& words){
+   cout << (state.pwd.empty() ? "/" : state.pwd) << endl;
    DEBUGF ('c', state);
    DEBUGF ('c', words);
 }

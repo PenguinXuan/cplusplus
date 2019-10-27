@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <unordered_map>
 #include <sstream>
+#include <stack>
 using namespace std;
 
 #include "debug.h"
@@ -60,6 +61,20 @@ directory_ptr  inode_state::get_dir_from_path(const string& path) {
     inode_ptr node = get_inode_from_path(path);
     return node == nullptr ? nullptr : node->get_dir();
 };
+void inode_state::update_pwd(const string &path) {
+    std::vector<std::string> sv;
+    split(path, sv, '/');
+    if(path.size() > 0 && path.at(0) == '/') {
+        pwd = path;
+        return;
+    } else {
+        pwd += "/";
+        pwd += path;
+    }
+}
+void inode_state::update_prompt(const string& prompt) {
+    prompt_ = prompt + " ";
+}
 void inode_state::split(const std::string& s, std::vector<std::string>& sv, const char delim = ' ') {
     sv.clear();
     std::istringstream iss(s);
