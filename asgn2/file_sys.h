@@ -78,7 +78,7 @@ class inode {
       size_t size();
       file_type get_file_type();
       inode_ptr get_ptr();
-      directory_ptr get_dict();
+      directory_ptr get_dir();
 };
 
 

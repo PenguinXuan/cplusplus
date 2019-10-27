@@ -47,7 +47,7 @@ inode_ptr  inode_state::get_inode_from_path(const string& path) {
         if(sv.at(i).empty() || sv.at(i) == ".") {
             continue;
         }
-        directory_ptr dir = cursor->get_dict();
+        directory_ptr dir = cursor->get_dir();
         if(dir->dirents.count(sv.at(i)) > 0) {
             cursor = dir->dirents[sv.at(i)];
         } else {
@@ -58,7 +58,7 @@ inode_ptr  inode_state::get_inode_from_path(const string& path) {
 }
 directory_ptr  inode_state::get_dir_from_path(const string& path) {
     inode_ptr node = get_inode_from_path(path);
-    return node == nullptr ? nullptr : node->get_dict();
+    return node == nullptr ? nullptr : node->get_dir();
 };
 void inode_state::split(const std::string& s, std::vector<std::string>& sv, const char delim = ' ') {
     sv.clear();
@@ -103,7 +103,7 @@ size_t inode::size() {
 file_type inode::get_file_type() {
     return f_type;
 }
-directory_ptr inode::get_dict() {
+directory_ptr inode::get_dir() {
     if(f_type == file_type::DIRECTORY_TYPE) {
         return dynamic_pointer_cast<directory> (contents);
     } else {
@@ -111,7 +111,7 @@ directory_ptr inode::get_dict() {
     }
 }
 inode_ptr inode::get_ptr() {
-    directory_ptr dict = get_dict();
+    directory_ptr dict = get_dir();
     if(dict != nullptr) {
         return dict->dirents.at(".");
     } else {
@@ -189,7 +189,7 @@ void directory::remove (const string& filename) {
         return;
     }
     if(dirents[filename]->get_file_type() == file_type::DIRECTORY_TYPE) {
-        if(dirents[filename]->get_dict()->dirents.size() > 2) {
+        if(dirents[filename]->get_dir()->dirents.size() > 2) {
             printf("directory not empty.\n");
             return;
         }
