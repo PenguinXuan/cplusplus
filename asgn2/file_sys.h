@@ -69,8 +69,10 @@ class inode {
       base_file_ptr contents;
    public:
       inode (file_type);
+      ~inode();
       int get_inode_nr() const;
       size_t size();
+      file_type get_file_type();
       inode_ptr get_ptr();
       directory_ptr get_dict();
 };

@@ -26,8 +26,7 @@ ostream& operator<< (ostream& out, file_type type) {
 }
 
 inode_state::inode_state() {
-    inode * node = new inode(file_type::DIRECTORY_TYPE);
-    root = node ->get_ptr();
+    root = make_shared<inode>(file_type::DIRECTORY_TYPE);
     cwd = root;
     DEBUGF ('i', "root = " << root << ", cwd = " << cwd
           << ", prompt = \"" << prompt() << "\"");
@@ -64,6 +63,9 @@ int inode::get_inode_nr() const {
 size_t inode::size() {
     return contents->size();
 }
+file_type inode::get_file_type() {
+    return f_type;
+}
 directory_ptr inode::get_dict() {
     if(f_type == file_type::DIRECTORY_TYPE) {
         return dynamic_pointer_cast<directory> (contents);
@@ -78,6 +80,10 @@ inode_ptr inode::get_ptr() {
     } else {
         return nullptr;
     }
+}
+
+inode::~inode() {
+    return;
 }
 void directory::ls() {
     map<string,inode_ptr>::iterator itr;
@@ -137,12 +143,31 @@ directory::directory(inode_ptr node) {
     dirents[".."] = node;
 }
 void directory::remove (const string& filename) {
-   DEBUGF ('i', filename);
+    if(filename.empty() || filename.compare(".") == 0 || filename.compare("..") == 0) {
+        printf("invalid argument.\n");
+        return;
+    }
+    if(dirents.count(filename) <= 0 || dirents[filename]->get_file_type() != file_type::DIRECTORY_TYPE) {
+        printf("directory not exists.\n");
+        return;
+    }
+    dirents.erase(filename);
+    DEBUGF ('i', filename);
 }
 
 inode_ptr directory::mkdir (const string& dirname) {
+   if(dirname.empty()) {
+       printf("invalid argument.\n");
+       return nullptr;
+   }
+   if(dirents.count(dirname) > 0) {
+       printf("directory exists.\n");
+       return dirents[dirname];
+   }
+   inode_ptr ptr = make_shared<inode>(file_type::DIRECTORY_TYPE);
+   dirents[dirname] = ptr;
    DEBUGF ('i', dirname);
-   return nullptr;
+   return ptr;
 }
 
 inode_ptr directory::mkfile (const string& filename) {
