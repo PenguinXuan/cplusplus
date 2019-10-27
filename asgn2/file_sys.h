@@ -68,7 +68,7 @@ class inode {
       file_type f_type;
       base_file_ptr contents;
    public:
-      inode (file_type);
+      inode (file_type, inode_ptr parent);
       ~inode();
       int get_inode_nr() const;
       size_t size();
@@ -152,7 +152,7 @@ class directory: public base_file {
          return "directory";
       }
    public:
-      directory(inode_ptr inodePtr);
+      directory(inode_ptr curr, inode_ptr parent);
       void ls();
       virtual size_t size() const override;
       virtual void remove (const string& filename) override;

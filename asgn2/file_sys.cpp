@@ -26,7 +26,7 @@ ostream& operator<< (ostream& out, file_type type) {
 }
 
 inode_state::inode_state() {
-    root = (new inode(file_type::DIRECTORY_TYPE)) ->get_ptr();
+    root = (new inode(file_type::DIRECTORY_TYPE, nullptr)) ->get_ptr();
     cwd = root;
     DEBUGF ('i', "root = " << root << ", cwd = " << cwd
           << ", prompt = \"" << prompt() << "\"");
@@ -42,7 +42,7 @@ ostream& operator<< (ostream& out, const inode_state& state) {
    return out;
 }
 
-inode::inode(file_type type): inode_nr (next_inode_nr++) {
+inode::inode(file_type type, inode_ptr parent): inode_nr (next_inode_nr++) {
     f_type = type;
     inode_ptr ptr(this);
     switch (type) {
@@ -50,7 +50,7 @@ inode::inode(file_type type): inode_nr (next_inode_nr++) {
            contents = make_shared<plain_file>();
            break;
       case file_type::DIRECTORY_TYPE:
-           contents = make_shared<directory>(ptr);
+           contents = make_shared<directory>(ptr, parent == nullptr ? ptr : parent);
            break;
    }
    DEBUGF ('i', "inode " << inode_nr << ", type = " << type);
@@ -138,18 +138,25 @@ size_t directory::size() const {
    DEBUGF ('i', "size = " << size);
    return size;
 }
-directory::directory(inode_ptr node) {
-    dirents["."] = node;
-    dirents[".."] = node;
+directory::directory(inode_ptr cur, inode_ptr parent) {
+    dirents["."] = cur;
+    dirents[".."] = parent;
 }
 void directory::remove (const string& filename) {
     if(filename.empty() || filename.compare(".") == 0 || filename.compare("..") == 0) {
         printf("invalid argument.\n");
         return;
     }
-    if(dirents.count(filename) <= 0 || dirents[filename]->get_file_type() != file_type::DIRECTORY_TYPE) {
-        printf("directory not exists.\n");
+    if(dirents.count(filename) <= 0) {
+        printf("file not exists.\n");
         return;
+    }
+    if(dirents[filename]->get_file_type() == file_type::DIRECTORY_TYPE) {
+        if(dirents[filename]->get_dict()->dirents.size() > 2) {
+            printf("directory not empty.\n");
+            return;
+        }
+
     }
     dirents.erase(filename);
     DEBUGF ('i', filename);
@@ -164,7 +171,7 @@ inode_ptr directory::mkdir (const string& dirname) {
        printf("directory exists.\n");
        return dirents[dirname];
    }
-   inode_ptr ptr = (new inode(file_type::DIRECTORY_TYPE)) ->get_ptr();
+   inode_ptr ptr = (new inode(file_type::DIRECTORY_TYPE, dirents["."])) ->get_ptr();
    dirents[dirname] = ptr;
    DEBUGF ('i', dirname);
    return ptr;
