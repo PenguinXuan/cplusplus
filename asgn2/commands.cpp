@@ -63,7 +63,7 @@ void fn_exit (inode_state& state, const wordvec& words){
 }
 
 void fn_ls (inode_state& state, const wordvec& words){
-    state.get_cur_dict()->ls();
+    state.get_cur_dir()->ls();
     DEBUGF ('c', state);
     DEBUGF ('c', words);
 }
@@ -79,7 +79,7 @@ void fn_make (inode_state& state, const wordvec& words){
 }
 
 void fn_mkdir (inode_state& state, const wordvec& words){
-   state.get_cur_dict()->mkdir(words[1]);
+   state.get_cur_dir()->mkdir(words[1]);
    DEBUGF ('c', state);
    DEBUGF ('c', words);
 }
@@ -95,7 +95,7 @@ void fn_pwd (inode_state& state, const wordvec& words){
 }
 
 void fn_rm (inode_state& state, const wordvec& words){
-   state.get_cur_dict()->remove(words[1]);
+   state.get_cur_dir()->remove(words[1]);
    DEBUGF ('c', state);
    DEBUGF ('c', words);
 }
