@@ -67,6 +67,7 @@ int main (int argc, char** argv) {
             // Split the line into words and lookup the appropriate
             // function.  Complain or call it.
             wordvec words = split (line, " \t");
+            if(words.at(0)[0] == '#') continue;
             DEBUGF ('y', "words = " << words);
             command_fn fn = find_command_fn (words.at(0));
             fn (state, words);
