@@ -203,7 +203,8 @@ inode_ptr base_file::mkdir (const string&) {
 }
 
 inode_ptr base_file::mkfile (const string&, const wordvec& newdata) {
-   throw file_error ("is a " + error_file_type());
+    cout << "data size: " << newdata.size() << endl;
+    throw file_error ("is a " + error_file_type());
 }
 
 
