@@ -76,7 +76,7 @@ class inode {
    public:
       file_type f_type;
       string path;
-      inode (file_type, inode_ptr parent, string path);
+      inode (file_type, inode_ptr parent, string full_path);
       ~inode();
       int get_inode_nr() const;
       size_t size();

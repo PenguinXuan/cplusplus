@@ -62,7 +62,7 @@ inode_ptr  inode_state::get_inode_from_path(const string& path, bool ignore_last
 directory_ptr  inode_state::get_dir_from_path(const string& path) {
     inode_ptr node = get_inode_from_path(path, false);
     return node == nullptr ? nullptr : node->get_dir();
-};
+}
 void inode_state::update_pwd(const string &path) {
     std::vector<std::string> sv;
     split(path, sv, '/');
@@ -106,9 +106,9 @@ ostream& operator<< (ostream& out, const inode_state& state) {
    return out;
 }
 
-inode::inode(file_type type, inode_ptr parent, string path): inode_nr (next_inode_nr++) {
+inode::inode(file_type type, inode_ptr parent, string full_path): inode_nr (next_inode_nr++) {
     f_type = type;
-    this->path = path;
+    path = full_path;
     switch (type) {
       case file_type::PLAIN_TYPE:
            contents = make_shared<plain_file>();
