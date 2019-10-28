@@ -53,11 +53,15 @@ void fn_cat (inode_state& state, const wordvec& words){
            return;
        }
    }
-   throw command_error ("No such file.");
+   string err_msg = words[0] + ": ";
+   if(words.size() > 1) {
+       err_msg += words[1] + ": ";
+   }
+   err_msg += "No such file.";
+   throw command_error (err_msg);
 }
 
 void fn_cd (inode_state& state, const wordvec& words){
-
     DEBUGF ('c', state);
     DEBUGF ('c', words);
     if(words.size() > 1) {
@@ -66,7 +70,12 @@ void fn_cd (inode_state& state, const wordvec& words){
            state.cwd = node;
            return;
        } else {
-           throw command_error ("No such directory.");
+          string err_msg = words[0] + ": ";
+          if(words.size() > 1) {
+              err_msg += words[1] + ": ";
+          }
+          err_msg += "No such directory.";
+          throw command_error (err_msg);
        }
     } else {
         state.cwd = state.root;
@@ -98,7 +107,12 @@ void fn_ls (inode_state& state, const wordvec& words){
            node->get_dir()->ls(false);
            return;
        }
-       throw command_error("No such directory.");
+        string err_msg = words[0] + ": ";
+        if(words.size() > 1) {
+            err_msg += words[1] + ": ";
+        }
+        err_msg += "No such dictionary.";
+        throw command_error (err_msg);
     }
 }
 
@@ -111,7 +125,12 @@ void fn_lsr (inode_state& state, const wordvec& words){
    } else {
        inode_ptr node = state.get_inode_from_path(words[1], false);
        if (node == nullptr || node->f_type != file_type::DIRECTORY_TYPE) {
-           throw command_error("No such directory.");
+           string err_msg = words[0] + ": ";
+           if(words.size() > 1) {
+               err_msg += words[1] + ": ";
+           }
+           err_msg += "No such dictionary.";
+           throw command_error (err_msg);
        }
        cur_dir = node->get_dir();
    }
@@ -132,7 +151,12 @@ void fn_make (inode_state& state, const wordvec& words){
            return;
        }
    }
-    throw command_error("No such directory.");
+    string err_msg = words[0] + ": ";
+    if(words.size() > 1) {
+        err_msg += words[1] + ": ";
+    }
+    err_msg += "No such dictionary.";
+    throw command_error (err_msg);
 }
 
 void fn_mkdir (inode_state& state, const wordvec& words){
@@ -146,7 +170,12 @@ void fn_mkdir (inode_state& state, const wordvec& words){
            return;
        }
    }
-   throw command_error("No such directory.");
+    string err_msg = words[0] + ": ";
+    if(words.size() > 1) {
+        err_msg += words[1] + ": ";
+    }
+    err_msg += "No such dictionary.";
+    throw command_error (err_msg);
 }
 
 void fn_prompt (inode_state& state, const wordvec& words){
@@ -174,7 +203,12 @@ void fn_rm (inode_state& state, const wordvec& words){
            return;
        }
    }
-   throw command_error ("No such file or directory.");
+    string err_msg = words[0] + ": ";
+    if(words.size() > 1) {
+        err_msg += words[1] + ": ";
+    }
+    err_msg += "No such file or dictionary";
+    throw command_error (err_msg);
 }
 
 void fn_rmr (inode_state& state, const wordvec& words){
