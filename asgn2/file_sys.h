@@ -36,10 +36,10 @@ class inode_state {
    friend class inode;
    friend ostream& operator<< (ostream& out, const inode_state&);
    private:
-      inode_ptr root {nullptr};
       void split(const std::string& s, std::vector<std::string>& sv, const char delim);
       string prompt_ {"% "};
    public:
+      inode_ptr root {nullptr};
       inode_ptr cwd {nullptr};
       string pwd = "";
       inode_state (const inode_state&) = delete; // copy ctor
@@ -75,7 +75,8 @@ class inode {
       base_file_ptr contents;
    public:
       file_type f_type;
-      inode (file_type, inode_ptr parent);
+      string path;
+      inode (file_type, inode_ptr parent, string path);
       ~inode();
       int get_inode_nr() const;
       size_t size();

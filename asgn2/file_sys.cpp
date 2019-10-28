@@ -28,7 +28,7 @@ ostream& operator<< (ostream& out, file_type type) {
 }
 
 inode_state::inode_state() {
-    root = (new inode(file_type::DIRECTORY_TYPE, nullptr)) ->get_ptr();
+    root = (new inode(file_type::DIRECTORY_TYPE, nullptr, "/")) ->get_ptr();
     cwd = root;
     DEBUGF ('i', "root = " << root << ", cwd = " << cwd
           << ", prompt = \"" << prompt() << "\"");
@@ -106,8 +106,9 @@ ostream& operator<< (ostream& out, const inode_state& state) {
    return out;
 }
 
-inode::inode(file_type type, inode_ptr parent): inode_nr (next_inode_nr++) {
+inode::inode(file_type type, inode_ptr parent, string path): inode_nr (next_inode_nr++) {
     f_type = type;
+    this->path = path;
     switch (type) {
       case file_type::PLAIN_TYPE:
            contents = make_shared<plain_file>();
@@ -158,9 +159,16 @@ inode::~inode() {
 }
 void directory::ls(bool recursive) {
     map<string,inode_ptr>::iterator itr;
+    int count = 0;
+    cout<<dirents["."]->path<<":"<<endl;
     for (itr = dirents.begin(); itr != dirents.end(); ++itr) {
-        printf("%6d  %6zu  ", itr->second->get_inode_nr(), itr->second->size());
-        cout<< "  "<< itr->first<< "\n";
+        printf("%6d  %6zu", itr->second->get_inode_nr(), itr->second->size());
+        cout<< "  "<< itr->first;
+        if(itr->second->f_type == file_type::DIRECTORY_TYPE && count > 1) {
+            cout<< "/";
+        }
+        cout<<endl;
+        count++;
     }
     if(recursive) {
         itr = dirents.begin();
@@ -202,7 +210,7 @@ inode_ptr base_file::mkfile (const string&, const wordvec& newdata) {
 size_t plain_file::size() const {
    size_t data_size = 0;
    if(data.size() == 0) return data_size;
-   for(int i = 0; i < data.size(); i++) {
+   for(size_t i = 0; i < data.size(); i++) {
        data_size += data.at(i).size();
    }
    data_size += data.size() - 1;
@@ -254,7 +262,10 @@ inode_ptr directory::mkdir (const string& dirname) {
    if(dirents.count(dirname) > 0) {
        throw command_error("directory or file exists.");
    }
-   inode_ptr ptr = (new inode(file_type::DIRECTORY_TYPE, dirents["."])) ->get_ptr();
+   string full_path = dirents["."]->path;
+   if(full_path.size() > 1) full_path += "/";
+   full_path += dirname;
+   inode_ptr ptr = (new inode(file_type::DIRECTORY_TYPE, dirents["."], full_path)) ->get_ptr();
    dirents[dirname] = ptr;
    DEBUGF ('i', dirname);
    return ptr;
@@ -268,7 +279,10 @@ inode_ptr directory::mkfile (const string& filename, const wordvec& newdata) {
        if(dirents[filename]->f_type ==file_type::DIRECTORY_TYPE)
            throw command_error("directory with same name already exists.");
    } else {
-       dirents[filename] = make_shared<inode>(file_type::PLAIN_TYPE, nullptr);
+       string full_path = dirents["."]->path;
+       if(full_path.size() > 1) full_path += "/";
+       full_path += filename;
+       dirents[filename] = make_shared<inode>(file_type::PLAIN_TYPE, nullptr, filename);
    }
    dirents[filename]->get_file()->writefile(newdata);
    DEBUGF ('i', filename);

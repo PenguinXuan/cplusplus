@@ -64,11 +64,13 @@ void fn_cd (inode_state& state, const wordvec& words){
        inode_ptr node= state.get_inode_from_path(words[1], false);
        if(node != nullptr && node->f_type == file_type::DIRECTORY_TYPE) {
            state.cwd = node;
-           state.update_pwd(words[1]);
            return;
+       } else {
+           throw command_error ("No such directory.");
        }
+    } else {
+        state.cwd = state.root;
     }
-    throw command_error ("No such directory.");
 
 }
 
@@ -108,7 +110,7 @@ void fn_lsr (inode_state& state, const wordvec& words){
        cur_dir = state.get_cur_dir();
    } else {
        inode_ptr node = state.get_inode_from_path(words[1], false);
-       if (node != nullptr || node->f_type != file_type::DIRECTORY_TYPE) {
+       if (node == nullptr || node->f_type != file_type::DIRECTORY_TYPE) {
            throw command_error("No such directory.");
        }
        cur_dir = node->get_dir();
@@ -156,7 +158,7 @@ void fn_prompt (inode_state& state, const wordvec& words){
 }
 
 void fn_pwd (inode_state& state, const wordvec& words){
-   cout << (state.pwd.empty() ? "/" : state.pwd) << endl;
+   cout << state.cwd->path << endl;
    DEBUGF ('c', state);
    DEBUGF ('c', words);
 }
