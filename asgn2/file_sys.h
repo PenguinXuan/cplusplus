@@ -46,7 +46,8 @@ class inode_state {
       inode_state& operator= (const inode_state&) = delete; // op=
       inode_state();
       directory_ptr get_cur_dir();
-      inode_ptr get_inode_from_path(const string& path);
+      inode_ptr get_inode_from_path(const string& path, bool ignore_last_node);
+      string get_name_from_path(const string& path);
       directory_ptr get_dir_from_path(const string& path);
       void update_pwd(const string& path);
       void update_prompt(const string& prompt);
@@ -71,9 +72,9 @@ class inode {
    private:
       static int next_inode_nr;
       int inode_nr;
-      file_type f_type;
       base_file_ptr contents;
    public:
+      file_type f_type;
       inode (file_type, inode_ptr parent);
       ~inode();
       int get_inode_nr() const;
@@ -81,6 +82,7 @@ class inode {
       file_type get_file_type();
       inode_ptr get_ptr();
       directory_ptr get_dir();
+      plain_file_ptr get_file();
 };
 
 
@@ -107,7 +109,7 @@ class base_file {
       virtual void writefile (const wordvec& newdata);
       virtual void remove (const string& filename);
       virtual inode_ptr mkdir (const string& dirname);
-      virtual inode_ptr mkfile (const string& filename);
+      virtual inode_ptr mkfile (const string& filename, const wordvec& newdata);
 };
 
 // class plain_file -
@@ -164,7 +166,7 @@ class directory: public base_file {
       virtual size_t size() const override;
       virtual void remove (const string& filename) override;
       virtual inode_ptr mkdir (const string& dirname) override;
-      virtual inode_ptr mkfile (const string& filename) override;
+      virtual inode_ptr mkfile (const string& filename, const wordvec& newdata) override;
 };
 
 #endif

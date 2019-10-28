@@ -52,7 +52,7 @@ void fn_cd (inode_state& state, const wordvec& words){
     DEBUGF ('c', state);
     DEBUGF ('c', words);
     if(words.size() > 1) {
-       inode_ptr node= state.get_inode_from_path(words[1]);
+       inode_ptr node= state.get_inode_from_path(words[1], false);
        if(node != nullptr) {
            state.cwd = node;
            state.update_pwd(words[1]);
@@ -90,12 +90,31 @@ void fn_lsr (inode_state& state, const wordvec& words){
 void fn_make (inode_state& state, const wordvec& words){
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+   if (words.size() > 1) {
+       inode_ptr node = state.get_inode_from_path(words[1], true);
+       if (node != nullptr && node->f_type == file_type::DIRECTORY_TYPE) {
+           const string name = state.get_name_from_path(words[1]);
+           wordvec data;
+           copy(words.begin() + 2, words.end(), back_inserter(data));
+           node->get_dir()->mkfile(name, data);
+           return;
+       }
+   }
+    throw command_error("No such directory.");
 }
 
 void fn_mkdir (inode_state& state, const wordvec& words){
-   state.get_cur_dir()->mkdir(words[1]);
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+   if (words.size() > 1) {
+       inode_ptr node = state.get_inode_from_path(words[1], true);
+       if (node != nullptr && node->f_type == file_type::DIRECTORY_TYPE) {
+           const string name = state.get_name_from_path(words[1]);
+           node->get_dir()->mkdir(name);
+           return;
+       }
+   }
+   throw command_error("No such directory.");
 }
 
 void fn_prompt (inode_state& state, const wordvec& words){
@@ -113,9 +132,17 @@ void fn_pwd (inode_state& state, const wordvec& words){
 }
 
 void fn_rm (inode_state& state, const wordvec& words){
-   state.get_cur_dir()->remove(words[1]);
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+   if(words.size() > 1) {
+       inode_ptr node= state.get_inode_from_path(words[1], true);
+       if(node != nullptr) {
+           const string name = state.get_name_from_path(words[1]);
+           node->get_dir()->remove(name);
+           return;
+       }
+   }
+   throw command_error ("No such file or directory.");
 }
 
 void fn_rmr (inode_state& state, const wordvec& words){

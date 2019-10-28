@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <stack>
+#include "commands.h"
 using namespace std;
 
 #include "debug.h"
@@ -35,16 +36,17 @@ inode_state::inode_state() {
 directory_ptr inode_state::get_cur_dir() {
     return dynamic_pointer_cast<directory> (cwd->contents);
 }
-inode_ptr  inode_state::get_inode_from_path(const string& path) {
+inode_ptr  inode_state::get_inode_from_path(const string& path, bool ignore_last_node) {
     std::vector<std::string> sv;
     split(path, sv, '/');
     inode_ptr cursor = cwd;
     if(path.size() > 0 && path.at(0) == '/') {
         cursor = root;
     }
-    size_t i = 0;
+    size_t i = 0, j = sv.size();
+    if(ignore_last_node) j--;
 
-    for(; i < sv.size(); i++) {
+    for(; i < j; i++) {
         if(sv.at(i).empty() || sv.at(i) == ".") {
             continue;
         }
@@ -58,7 +60,7 @@ inode_ptr  inode_state::get_inode_from_path(const string& path) {
     return cursor;
 }
 directory_ptr  inode_state::get_dir_from_path(const string& path) {
-    inode_ptr node = get_inode_from_path(path);
+    inode_ptr node = get_inode_from_path(path, false);
     return node == nullptr ? nullptr : node->get_dir();
 };
 void inode_state::update_pwd(const string &path) {
@@ -71,6 +73,16 @@ void inode_state::update_pwd(const string &path) {
         pwd += "/";
         pwd += path;
     }
+}
+string inode_state::get_name_from_path(const string& path) {
+    std::vector<std::string> sv;
+    split(path, sv, '/');
+    if(sv.size() > 0) {
+        return sv.at(sv.size() - 1);
+    } else {
+        return nullptr;
+    }
+
 }
 void inode_state::update_prompt(const string& prompt) {
     prompt_ = prompt + " ";
@@ -96,12 +108,12 @@ ostream& operator<< (ostream& out, const inode_state& state) {
 
 inode::inode(file_type type, inode_ptr parent): inode_nr (next_inode_nr++) {
     f_type = type;
-    inode_ptr ptr(this);
     switch (type) {
       case file_type::PLAIN_TYPE:
            contents = make_shared<plain_file>();
            break;
       case file_type::DIRECTORY_TYPE:
+           inode_ptr ptr(this);
            contents = make_shared<directory>(ptr, parent == nullptr ? ptr : parent);
            break;
    }
@@ -121,6 +133,13 @@ file_type inode::get_file_type() {
 directory_ptr inode::get_dir() {
     if(f_type == file_type::DIRECTORY_TYPE) {
         return dynamic_pointer_cast<directory> (contents);
+    } else {
+        return nullptr;
+    }
+}
+plain_file_ptr inode::get_file() {
+    if(f_type == file_type::PLAIN_TYPE) {
+        return dynamic_pointer_cast<plain_file> (contents);
     } else {
         return nullptr;
     }
@@ -165,15 +184,20 @@ inode_ptr base_file::mkdir (const string&) {
    throw file_error ("is a " + error_file_type());
 }
 
-inode_ptr base_file::mkfile (const string&) {
+inode_ptr base_file::mkfile (const string&, const wordvec& newdata) {
    throw file_error ("is a " + error_file_type());
 }
 
 
 size_t plain_file::size() const {
-   size_t size {0};
-   DEBUGF ('i', "size = " << size);
-   return size;
+   size_t data_size = 0;
+   if(data.size() == 0) return data_size;
+   for(int i = 0; i < data.size(); i++) {
+       data_size += data.at(i).size();
+   }
+   data_size += data.size() - 1;
+   DEBUGF ('i', "size = " << data_size);
+   return data_size;
 }
 
 const wordvec& plain_file::readfile() const {
@@ -182,6 +206,7 @@ const wordvec& plain_file::readfile() const {
 }
 
 void plain_file::writefile (const wordvec& words) {
+   data = words;
    DEBUGF ('i', words);
 }
 
@@ -196,17 +221,15 @@ directory::directory(inode_ptr cur, inode_ptr parent) {
 }
 void directory::remove (const string& filename) {
     if(filename.empty() || filename.compare(".") == 0 || filename.compare("..") == 0) {
-        printf("invalid argument.\n");
+        throw command_error ("invalid argument ");
         return;
     }
     if(dirents.count(filename) <= 0) {
-        printf("file not exists.\n");
-        return;
+        throw command_error ("No such file or directory.");
     }
     if(dirents[filename]->get_file_type() == file_type::DIRECTORY_TYPE) {
         if(dirents[filename]->get_dir()->dirents.size() > 2) {
-            printf("directory not empty.\n");
-            return;
+            throw command_error ("directory not empty");
         }
 
     }
@@ -216,12 +239,10 @@ void directory::remove (const string& filename) {
 
 inode_ptr directory::mkdir (const string& dirname) {
    if(dirname.empty()) {
-       printf("invalid argument.\n");
-       return nullptr;
+       throw command_error ("invalid argument ");
    }
    if(dirents.count(dirname) > 0) {
-       printf("directory exists.\n");
-       return dirents[dirname];
+       throw command_error("directory or file exists.");
    }
    inode_ptr ptr = (new inode(file_type::DIRECTORY_TYPE, dirents["."])) ->get_ptr();
    dirents[dirname] = ptr;
@@ -229,7 +250,17 @@ inode_ptr directory::mkdir (const string& dirname) {
    return ptr;
 }
 
-inode_ptr directory::mkfile (const string& filename) {
+inode_ptr directory::mkfile (const string& filename, const wordvec& newdata) {
+   if(filename.empty()) {
+       throw command_error ("invalid argument ");
+   }
+   if(dirents.count(filename) > 0) {
+       if(dirents[filename]->f_type ==file_type::DIRECTORY_TYPE)
+           throw command_error("directory with same name already exists.");
+   } else {
+       dirents[filename] = make_shared<inode>(file_type::PLAIN_TYPE, nullptr);
+   }
+   dirents[filename]->get_file()->writefile(newdata);
    DEBUGF ('i', filename);
    return nullptr;
 }
