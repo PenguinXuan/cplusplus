@@ -156,11 +156,21 @@ inode_ptr inode::get_ptr() {
 inode::~inode() {
     return;
 }
-void directory::ls() {
+void directory::ls(bool recursive) {
     map<string,inode_ptr>::iterator itr;
     for (itr = dirents.begin(); itr != dirents.end(); ++itr) {
         printf("%6d  %6zu  ", itr->second->get_inode_nr(), itr->second->size());
         cout<< "  "<< itr->first<< "\n";
+    }
+    if(recursive) {
+        itr = dirents.begin();
+        itr ++;
+        itr ++;
+        for (; itr != dirents.end(); ++itr) {
+            if(itr->second->f_type == file_type::DIRECTORY_TYPE) {
+                itr->second->get_dir()->ls(true);
+            }
+        }
     }
 }
 

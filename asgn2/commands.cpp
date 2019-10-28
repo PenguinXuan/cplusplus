@@ -45,6 +45,15 @@ int exit_status_message() {
 void fn_cat (inode_state& state, const wordvec& words){
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+   if(words.size() > 1) {
+       inode_ptr node= state.get_inode_from_path(words[1], false);
+       if(node != nullptr && node->f_type == file_type::PLAIN_TYPE) {
+           const wordvec &data = node->get_file()->readfile();
+           cout << word_range (data.cbegin(), data.cend()) << endl;
+           return;
+       }
+   }
+   throw command_error ("No such file.");
 }
 
 void fn_cd (inode_state& state, const wordvec& words){
@@ -53,7 +62,7 @@ void fn_cd (inode_state& state, const wordvec& words){
     DEBUGF ('c', words);
     if(words.size() > 1) {
        inode_ptr node= state.get_inode_from_path(words[1], false);
-       if(node != nullptr) {
+       if(node != nullptr && node->f_type == file_type::DIRECTORY_TYPE) {
            state.cwd = node;
            state.update_pwd(words[1]);
            return;
@@ -77,14 +86,35 @@ void fn_exit (inode_state& state, const wordvec& words){
 }
 
 void fn_ls (inode_state& state, const wordvec& words){
-    state.get_cur_dir()->ls();
     DEBUGF ('c', state);
     DEBUGF ('c', words);
+    if (words.size() == 1) {
+       state.get_cur_dir()->ls(false);
+    } else {
+       inode_ptr node = state.get_inode_from_path(words[1], false);
+       if (node != nullptr && node->f_type == file_type::DIRECTORY_TYPE) {
+           node->get_dir()->ls(false);
+           return;
+       }
+       throw command_error("No such directory.");
+    }
 }
 
 void fn_lsr (inode_state& state, const wordvec& words){
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+   directory_ptr cur_dir;
+   if (words.size() == 1) {
+       cur_dir = state.get_cur_dir();
+   } else {
+       inode_ptr node = state.get_inode_from_path(words[1], false);
+       if (node != nullptr || node->f_type != file_type::DIRECTORY_TYPE) {
+           throw command_error("No such directory.");
+       }
+       cur_dir = node->get_dir();
+   }
+   cur_dir->ls(true);
+
 }
 
 void fn_make (inode_state& state, const wordvec& words){
