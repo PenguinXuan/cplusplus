@@ -194,7 +194,8 @@ void base_file::writefile (const wordvec&) {
    throw file_error ("is a " + error_file_type());
 }
 
-void base_file::remove (const string&) {
+void base_file::remove (const string&, bool recursive) {
+   cout << "is recursive" << recursive;
    throw file_error ("is a " + error_file_type());
 }
 
@@ -238,7 +239,7 @@ directory::directory(inode_ptr cur, inode_ptr parent) {
     dirents["."] = cur;
     dirents[".."] = parent;
 }
-void directory::remove (const string& filename) {
+void directory::remove (const string& filename, bool recursive) {
     if(filename.empty() || filename.compare(".") == 0 || filename.compare("..") == 0) {
         throw command_error ("invalid argument ");
         return;
@@ -247,10 +248,25 @@ void directory::remove (const string& filename) {
         throw command_error ("No such file or directory.");
     }
     if(dirents[filename]->get_file_type() == file_type::DIRECTORY_TYPE) {
-        if(dirents[filename]->get_dir()->dirents.size() > 2) {
+        if(dirents[filename]->get_dir()->dirents.size() > 2 && !recursive) {
             throw command_error ("directory not empty");
         }
 
+    }
+    if(recursive && dirents[filename]->f_type == file_type::DIRECTORY_TYPE) {
+        directory_ptr sub_dir = dirents[filename]->get_dir();
+        map<string,inode_ptr>::iterator itr;
+        int count = 0;
+        for (itr = sub_dir->dirents.begin(); itr != sub_dir->dirents.end(); ++itr) {
+            if(count > 1) {
+                if(itr->second->f_type == file_type::DIRECTORY_TYPE) {
+                    sub_dir->remove(itr->first, true);
+                } else {
+                    sub_dir->remove(itr->first, false);
+                }
+            }
+            count++;
+        }
     }
     dirents.erase(filename);
     DEBUGF ('i', filename);
@@ -278,7 +294,7 @@ inode_ptr directory::mkfile (const string& filename, const wordvec& newdata) {
    }
    if(dirents.count(filename) > 0) {
        if(dirents[filename]->f_type ==file_type::DIRECTORY_TYPE)
-           throw command_error("directory with same name already exists.");
+           throw command_error("make: " + filename + ": directory with same name already exists.");
    } else {
        string full_path = dirents["."]->path;
        if(full_path.size() > 1) full_path += "/";

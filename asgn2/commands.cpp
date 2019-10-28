@@ -18,6 +18,7 @@ command_hash cmd_hash {
    {"prompt", fn_prompt},
    {"pwd"   , fn_pwd   },
    {"rm"    , fn_rm    },
+   {"rmr"    , fn_rmr    },
 };
 
 command_fn find_command_fn (const string& cmd) {
@@ -122,19 +123,23 @@ void fn_lsr (inode_state& state, const wordvec& words){
    directory_ptr cur_dir;
    if (words.size() == 1) {
        cur_dir = state.get_cur_dir();
+       cur_dir->ls(true);
    } else {
-       inode_ptr node = state.get_inode_from_path(words[1], false);
-       if (node == nullptr || node->f_type != file_type::DIRECTORY_TYPE) {
-           string err_msg = words[0] + ": ";
-           if(words.size() > 1) {
-               err_msg += words[1] + ": ";
+       for(int i = 1; i < words.size(); i++) {
+           inode_ptr node = state.get_inode_from_path(words[i], false);
+           if (node == nullptr || node->f_type != file_type::DIRECTORY_TYPE) {
+               string err_msg = words[0] + ": ";
+               if (words.size() > 1) {
+                   err_msg += words[1] + ": ";
+               }
+               err_msg += "No such dictionary.";
+               throw command_error(err_msg);
            }
-           err_msg += "No such dictionary.";
-           throw command_error (err_msg);
+           cur_dir = node->get_dir();
+           cur_dir->ls(true);
        }
-       cur_dir = node->get_dir();
    }
-   cur_dir->ls(true);
+
 
 }
 
@@ -199,7 +204,7 @@ void fn_rm (inode_state& state, const wordvec& words){
        inode_ptr node= state.get_inode_from_path(words[1], true);
        if(node != nullptr) {
            const string name = state.get_name_from_path(words[1]);
-           node->get_dir()->remove(name);
+           node->get_dir()->remove(name, false);
            return;
        }
    }
@@ -214,5 +219,19 @@ void fn_rm (inode_state& state, const wordvec& words){
 void fn_rmr (inode_state& state, const wordvec& words){
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+   if(words.size() > 1) {
+       inode_ptr node= state.get_inode_from_path(words[1], true);
+       if(node != nullptr) {
+           const string name = state.get_name_from_path(words[1]);
+           node->get_dir()->remove(name, true);
+           return;
+       }
+   }
+   string err_msg = words[0] + ": ";
+   if(words.size() > 1) {
+       err_msg += words[1] + ": ";
+   }
+   err_msg += "No such file or dictionary";
+   throw command_error (err_msg);
 }
 

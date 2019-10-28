@@ -108,7 +108,7 @@ class base_file {
       virtual size_t size() const = 0;
       virtual const wordvec& readfile() const;
       virtual void writefile (const wordvec& newdata);
-      virtual void remove (const string& filename);
+      virtual void remove (const string& filename, bool recursive);
       virtual inode_ptr mkdir (const string& dirname);
       virtual inode_ptr mkfile (const string& filename, const wordvec& newdata);
 };
@@ -165,7 +165,7 @@ class directory: public base_file {
       directory(inode_ptr curr, inode_ptr parent);
       void ls(bool recursive);
       virtual size_t size() const override;
-      virtual void remove (const string& filename) override;
+      virtual void remove (const string& filename, bool recursive) override;
       virtual inode_ptr mkdir (const string& dirname) override;
       virtual inode_ptr mkfile (const string& filename, const wordvec& newdata) override;
 };
