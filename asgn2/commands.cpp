@@ -96,6 +96,9 @@ void fn_echo (inode_state& state, const wordvec& words){
 void fn_exit (inode_state& state, const wordvec& words){
    DEBUGF ('c', state);
    DEBUGF ('c', words);
+   if(words.size() > 1) {
+       exec::status(stoi(words[1]));
+   }
    throw ysh_exit();
 }
 
@@ -127,7 +130,7 @@ void fn_lsr (inode_state& state, const wordvec& words){
        cur_dir = state.get_cur_dir();
        cur_dir->ls(true);
    } else {
-       for(int i = 1; i < words.size(); i++) {
+       for(size_t i = 1; i < words.size(); i++) {
            inode_ptr node = state.get_inode_from_path(words[i], false);
            if (node == nullptr || node->f_type != file_type::DIRECTORY_TYPE) {
                string err_msg = words[0] + ": ";
