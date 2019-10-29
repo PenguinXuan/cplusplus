@@ -243,7 +243,6 @@ directory::directory(inode_ptr cur, inode_ptr parent) {
 }
 void directory::remove (const string& filename, bool recursive) {
     if(filename.empty() || filename.compare(".") == 0 || filename.compare("..") == 0) {
-        throw command_error ("invalid argument ");
         return;
     }
     if(dirents.count(filename) <= 0) {
