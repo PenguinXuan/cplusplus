@@ -22,47 +22,50 @@ void trim(string &line) {
     size_t first = line.find_first_not_of(' ');
     size_t last = line.find_last_not_of(' ');
     if (first != string::npos && last != string::npos) {
-        line = line.substr(first, last-first+1);
+        line = line.substr(first, last - first + 1);
     }
 }
 
 void parse_line(string line, str_str_map &test) {
+    str_str_map::iterator curr;
     smatch m;
-    regex key_value ("(\\w+)=(\\w+)");
-    regex key_ ("(\\w+)=\\s");
-    regex key ("^(\\w+)$");
-    regex _value ("=(\\w+)");
+    regex key ("^([^=]+)$");
+    regex key_ ("([^=]+)=\\s+");
+    regex key_value ("([^=]+)=(.+)");
+    regex equal ("^[=]$");
+    regex _value ("^=(.+)");
 
 
     trim(line);
-    if (line.at(0) == '#') { // #
+    if (line.size() == 0) { // #
         return;
-    } else if (line.size() == 0) {
+    } else if (line[0] == '#') {
         return;
-    } else if (line.at(0) == '=') { // =
+    } else if (regex_search(line, m, equal)) { // =
         for(auto itor = test.begin(); itor != test.end(); ++itor) {
             cout << itor->first << " = " << itor->second << endl;
         }
     } else if (regex_search(line, m, key_value)) { // key = value
-        str_str_pair pair(m[0], m[1]);
-        test.insert(pair);
-        cout << m[0] << " = " << m[1] << endl;
+        //cout << m[1] << "**" << m[2] << endl;
+        str_str_pair pair(m[1], m[2]);
+        curr = test.insert(pair);
+        cout << curr->first + " = " + curr->second << endl;
     } else if (regex_search(line, m, key_)) { // key =
-        itor i = test.find(m[0]);
-        if(i != test.end()) {
-            i.erase();
+        curr = test.find(m[1]);
+        if (curr != test.end()) {
+            test.erase(curr);
         }
     } else if (regex_search(line, m, key)) {  // key
-        itor i = test.find(m[0]);
-        if(i == test.end()) {
-            cout << line <<": key not found" << endl;
+        curr = test.find(m[1]);
+        if(curr == test.end()) {
+            cout << m[1] <<": key not found" << endl;
         } else {
-            cout << i->first << " = " << i->second << endl;
+            cout << curr->first << " = " << curr->second << endl;
 
         }
     } else if (regex_search(line, m, _value)) { // = value
         for(auto itor = test.begin();itor != test.end(); ++itor){
-            if(m[0] == itor->second){
+            if(m[1] == itor->second){
                 cout << itor->first << " = " << itor->second << endl;
             }
         }
@@ -89,34 +92,38 @@ void scan_options (int argc, char** argv) {
 int main (int argc, char** argv) {
    sys_info::execname (argv[0]);
    scan_options (argc, argv);
+
    string line = "";
    int count = 0;
-   string fileName = "";
-
    str_str_map test;
-   for (char** argp = &argv[optind]; argp != &argv[argc]; ++argp) {
-       fileName = *argp;
-       if (fileName.compare("-")) {
-           while(!cin.eof()) {
-               getline(cin,line);
-               count++;
-               cout << fileName << ": " << count << ": " << line <<endl;
-               parse_line(line, test);
-           }
-       } else {
-           ifstream in(fileName);
-           if (in.fail()) {
-               cout << "Can't open the file" << endl;
-           }
-           while(!in.eof()) {
-               getline(in,line);
-               count++;
-               cout << *argp << ": " << count << ": " << line << endl;
-               parse_line(line, test);
+
+   if (optind == argc) {
+       while (getline(cin, line)) {
+           count++;
+           cout << "-" << ": " << count << ": " << line << endl;
+           parse_line(line, test);
+
+       }
+
+   } else {
+       for (char** argp = &argv[optind]; argp != &argv[argc]; ++argp) {
+           try {
+               ifstream infile;
+               infile.open(*argp);
+               if (infile.is_open()) {
+                   while (getline(infile, line)) {
+                       count++;
+                       cout << *argp << ": " << count << ": " << line << endl;
+                       parse_line(line, test);
+                   }
+               }
+               infile.close();
+           } catch (exception& e){
+               cout << e.what() << endl;
            }
        }
    }
-   cout << "EXIT_SUCCESS" << endl;
+   //cout << "EXIT_SUCCESS" << endl;
    return EXIT_SUCCESS;
 }
 
