@@ -30,7 +30,7 @@ void parse_line(string line, str_str_map &test) {
     str_str_map::iterator curr;
     smatch m;
     regex key ("^([^=]+)$");
-    regex key_ ("([^=]+)=\\s+");
+    regex key_ ("([^=]+)=\\s*");
     regex key_value ("([^=]+)=(.+)");
     regex equal ("^[=]$");
     regex _value ("^=(.+)");
@@ -64,9 +64,9 @@ void parse_line(string line, str_str_map &test) {
 
         }
     } else if (regex_search(line, m, _value)) { // = value
-        for(auto itor = test.begin();itor != test.end(); ++itor){
-            if(m[1] == itor->second){
-                cout << itor->first << " = " << itor->second << endl;
+        for(auto i = test.begin(); i != test.end(); ++i){
+            if(m[1] == i->second){
+                cout << i->first << " = " << i->second << endl;
             }
         }
     }
