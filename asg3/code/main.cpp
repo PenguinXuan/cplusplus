@@ -42,8 +42,8 @@ void parse_line(string line, str_str_map &test) {
     } else if (line[0] == '#') {
         return;
     } else if (regex_search(line, m, equal)) { // =
-        for(auto itor = test.begin(); itor != test.end(); ++itor) {
-            cout << itor->first << " = " << itor->second << endl;
+        for(auto i = test.begin(); i != test.end(); ++i) {
+            cout << i->first << " = " << i->second << endl;
         }
     } else if (regex_search(line, m, key_value)) { // key = value
         //cout << m[1] << "**" << m[2] << endl;
