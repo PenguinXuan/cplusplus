@@ -107,20 +107,20 @@ int main (int argc, char** argv) {
 
    } else {
        for (char** argp = &argv[optind]; argp != &argv[argc]; ++argp) {
-           try {
-               ifstream infile;
-               infile.open(*argp);
-               if (infile.is_open()) {
-                   while (getline(infile, line)) {
-                       count++;
-                       cout << *argp << ": " << count << ": " << line << endl;
-                       parse_line(line, test);
-                   }
+           ifstream infile;
+           infile.open(*argp);
+           if (infile.is_open()) {
+               while (getline(infile, line)) {
+                   count++;
+                   cout << *argp << ": " << count << ": "
+                   << line << endl;
+                   parse_line(line, test);
                }
                infile.close();
-           } catch (exception& e){
-               cout << e.what() << endl;
+           } else {
+               cerr << "File not found" << endl;
            }
+
        }
    }
    //cout << "EXIT_SUCCESS" << endl;
