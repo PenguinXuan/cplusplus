@@ -14,7 +14,9 @@
 //
 template <typename key_t, typename mapped_t, class less_t>
 listmap<key_t,mapped_t,less_t>::~listmap() {
-   DEBUGF ('l', reinterpret_cast<const void*> (this));
+    while (not empty()) {
+        erase(begin());
+    }
 }
 
 //
