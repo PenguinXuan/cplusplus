@@ -12,6 +12,7 @@ using namespace std;
 #include "protocol.h"
 #include "logstream.h"
 #include "sockets.h"
+#include <signal.h>
 
 logstream outlog (cout);
 struct cix_exit: public exception {};
