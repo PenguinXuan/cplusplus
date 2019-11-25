@@ -69,7 +69,7 @@ void reply_get(accepted_socket& client_sock, cix_header& header) {
     }
     auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
     buffer[stat_buf.st_size] = '\0';
-    infile.read(reinterpret_cast<char*>(&buffer), stat_buf.st_size);
+    infile.read(buffer.get(), stat_buf.st_size);
     header.command = cix_command::FILEOUT;
     header.nbytes = stat_buf.st_size;
     memset (header.filename, 0, FILENAME_SIZE);
