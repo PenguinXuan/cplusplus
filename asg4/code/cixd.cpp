@@ -1,4 +1,6 @@
 // $Id: cixd.cpp,v 1.8 2019-04-05 15:04:28-07 - - $
+// By: Zhuoxuan Wang (zwang437@ucsc.edu)
+// and Xiong Lou (xlou2@ucsc.edu)
 
 #include <iostream>
 #include <string>
@@ -7,7 +9,10 @@ using namespace std;
 
 #include <libgen.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <fstream>
+#include <string>
 
 #include "protocol.h"
 #include "logstream.h"
@@ -48,6 +53,71 @@ void reply_ls (accepted_socket& client_sock, cix_header& header) {
    outlog << "sent " << ls_output.size() << " bytes" << endl;
 }
 
+void reply_get(accepted_socket& client_sock, cix_header& header) {
+    ifstream infile (header.filename, std::ios::in | ios::binary);
+    const char* filename = header.filename;
+    struct stat stat_buf;
+    int status = stat (filename, &stat_buf);
+    if (status != 0) {
+        outlog << filename << ": "
+             << strerror (errno) << endl;
+        header.command = cix_command::NAK;
+        header.nbytes = errno;
+        send_packet (client_sock, &header, sizeof header);
+        return;
+    }
+    auto buffer = make_unique<char[]> (header.nbytes + 1);
+    buffer[header.nbytes] = '\0';
+    infile.read(reinterpret_cast<char*>(&buffer), stat_buf.st_size);
+
+    header.command = cix_command::FILEOUT;
+    header.nbytes = stat_buf.st_size;
+    memset (header.filename, 0, FILENAME_SIZE);
+    outlog << "sending header " << header << endl;
+    send_packet (client_sock, &header, sizeof header);
+    send_packet (client_sock, &buffer, stat_buf.st_size);
+    outlog << "sent " << stat_buf.st_size << " bytes" << endl;
+
+}
+void reply_put(accepted_socket& client_sock, cix_header& header) {
+    ofstream outfile (header.filename, std::ios::out | ios::binary);
+    const char* filename = header.filename;
+    struct stat stat_buf;
+    int status = stat (filename, &stat_buf);
+    if (status != 0) {
+        outlog << filename << ": "
+               << strerror (errno) << endl;
+        header.command = cix_command::NAK;
+        header.nbytes = errno;
+        send_packet (client_sock, &header, sizeof header);
+        return;
+    }
+    auto buffer = make_unique<char[]> (header.nbytes + 1);
+    buffer[header.nbytes] = '\0';
+    outfile.write(reinterpret_cast<char*>(&buffer), stat_buf.st_size);
+    header.command = cix_command::ACK;
+    header.nbytes = 0;
+    memset (header.filename, 0, FILENAME_SIZE);
+    outlog << "sending header " << header << endl;
+    send_packet (client_sock, &header, sizeof header);
+}
+
+void reply_rm(accepted_socket& client_sock, cix_header& header) {
+    if (unlink(header.filename)) {
+        outlog << "rm " << header.filename << " failed: " << strerror (errno) << endl;
+        header.command = cix_command::NAK;
+        header.nbytes = errno;
+        send_packet (client_sock, &header, sizeof header);
+        return;
+    }
+    header.command = cix_command::ACK;
+    header.nbytes = 0;
+    memset (header.filename, 0, FILENAME_SIZE);
+    outlog << "sending header " << header << endl;
+    send_packet (client_sock, &header, sizeof header);
+
+}
+
 
 void run_server (accepted_socket& client_sock) {
    outlog.execname (outlog.execname() + "-server");
@@ -60,6 +130,15 @@ void run_server (accepted_socket& client_sock) {
          switch (header.command) {
             case cix_command::LS: 
                reply_ls (client_sock, header);
+               break;
+            case cix_command::GET:
+               reply_get(client_sock, header);
+               break;
+            case cix_command::PUT:
+               reply_put(client_sock, header);
+               break;
+            case cix_command::RM:
+               reply_rm(client_sock, header);
                break;
             default:
                outlog << "invalid client header:" << header << endl;
