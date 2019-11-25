@@ -67,6 +67,7 @@ void reply_get(accepted_socket& client_sock, cix_header& header) {
         send_packet (client_sock, &header, sizeof header);
         return;
     }
+
     auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
     buffer[stat_buf.st_size] = '\0';
     infile.read(buffer.get(), stat_buf.st_size);
@@ -80,6 +81,7 @@ void reply_get(accepted_socket& client_sock, cix_header& header) {
 
 }
 void reply_put(accepted_socket& client_sock, cix_header& header) {
+    outlog <<  "1****" << endl;
     ofstream outfile (header.filename, std::ios::out | ios::binary);
     auto buffer = make_unique<char[]> (header.nbytes + 1);
     recv_packet (client_sock, buffer.get(), header.nbytes);
@@ -87,6 +89,7 @@ void reply_put(accepted_socket& client_sock, cix_header& header) {
     outlog << "received " << header.nbytes << " bytes" << endl;
     cout << buffer.get();
 
+    outlog <<  "2****" << endl;
     outfile.write(buffer.get(), header.nbytes);
     buffer[header.nbytes] = '\0';
     header.command = cix_command::ACK;
