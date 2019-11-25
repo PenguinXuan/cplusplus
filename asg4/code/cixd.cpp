@@ -85,7 +85,7 @@ void reply_put(accepted_socket& client_sock, cix_header& header) {
     struct stat stat_buf;
     int status = stat (filename, &stat_buf);
     if (status != 0) {
-        outlog << filename << ": "
+        outlog << "open " << filename << " failed: "
                << strerror (errno) << endl;
         header.command = cix_command::NAK;
         header.nbytes = errno;
@@ -95,6 +95,7 @@ void reply_put(accepted_socket& client_sock, cix_header& header) {
     auto buffer = make_unique<char[]> (header.nbytes + 1);
     buffer[header.nbytes] = '\0';
     outfile.write(reinterpret_cast<char*>(&buffer), stat_buf.st_size);
+    cout << buffer.get();
     header.command = cix_command::ACK;
     header.nbytes = 0;
     memset (header.filename, 0, FILENAME_SIZE);

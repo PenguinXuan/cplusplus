@@ -82,7 +82,7 @@ void cix_get (client_socket& server, string filename) {
         outlog << "sent GET, server did not return FILEOUT" << endl;
         outlog << "server returned " << header << endl;
     } else {
-        ofstream outfile (filename);
+        ofstream outfile (filename, std::ios::out | std::ios::binary);
         auto buffer = make_unique<char[]> (header.nbytes + 1);
         recv_packet (server, buffer.get(), header.nbytes);
         outlog << "received " << header.nbytes << " bytes" << endl;
@@ -94,27 +94,34 @@ void cix_get (client_socket& server, string filename) {
 }
 
 void cix_put (client_socket& server, string filename) {
-    if (filename.size() >= FILENAME_SIZE)
+    if (filename.size() >= FILENAME_SIZE) {
         outlog << filename << ": filename is too long.\n";
-    if (filename.find('/') != string::npos)
+        return;
+    }
+    if (filename.find('/') != string::npos) {
         outlog << filename << ": filename can't have any slash characters in it.\n";
-
+        return;
+    }
     cix_header header;
+    ifstream infile (filename, std::ios::in | ios::binary);
+    const char* file = filename.c_str();
+    struct stat stat_buf;
+    int status = stat (file, &stat_buf);
+    if (status != 0) {
+        outlog << "open " << filename << " failed: "<< ": "
+               << strerror (errno) << endl;
+        return;
+    }
+    auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
+    buffer[stat_buf.st_size] = '\0';
     header.command = cix_command::PUT;
     strcpy(header.filename, filename.c_str());
-    struct stat st;
-    const char* f = filename.c_str();
-    stat(f, &st);
-    int size = st.st_size;
-    ifstream infile (header.filename, ios::in | ios::binary);
-    auto buffer = make_unique<char[]> (size + 1);
-    infile.read(reinterpret_cast<char*>(&buffer), size);
-
+    infile.read(reinterpret_cast<char*>(&buffer), stat_buf.st_size);
     outlog << "sending header " << header << endl;
     send_packet (server, &header, sizeof header);
-    send_packet (server, &buffer, size);
+    send_packet (server, &buffer, stat_buf.st_size);
     recv_packet (server, &header, sizeof header);
-
+    outlog << "received header " << header << endl;
     if (header.command != cix_command::ACK) {
         outlog << "sent PUT, server did not return ACK" << endl;
         outlog << "server returned " << header << endl;
