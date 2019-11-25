@@ -90,7 +90,6 @@ void cix_get (client_socket& server, string filename) {
         cout << buffer.get();
         outfile.write(buffer.get(), header.nbytes);
         outfile.close();
-        outlog << "test cix2" << endl;
     }
 }
 
@@ -169,7 +168,6 @@ int main (int argc, char** argv) {
       client_socket server (host, port);
       outlog << "connected to " << to_string (server) << endl;
       for (;;) {
-         outlog << "test cix" << endl;
          string line;
          getline (cin, line);
          if (cin.eof()) throw cix_exit();
