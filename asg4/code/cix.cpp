@@ -177,7 +177,7 @@ int main (int argc, char** argv) {
          string filename;
          string command;
          smatch m;
-         regex tokens ("([^\\]+)\\s+([^\\s]+)");
+         regex tokens ("(\\w+)\\s+(.+)");
 
          trim(line);
          outlog << line << endl;
