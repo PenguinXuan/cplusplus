@@ -78,7 +78,7 @@ void reply_get(accepted_socket& client_sock, cix_header& header) {
     memset (header.filename, 0, FILENAME_SIZE);
     outlog << "sending header " << header << endl;
     send_packet (client_sock, &header, sizeof header);
-    send_packet (client_sock, &buffer, stat_buf.st_size);
+    send_packet (client_sock, buffer, stat_buf.st_size);
     outlog << "sent " << stat_buf.st_size << " bytes" << endl;
 
 }
@@ -87,8 +87,8 @@ void reply_put(accepted_socket& client_sock, cix_header& header) {
     //auto buffer = make_unique<char[]> (header.nbytes + 1);
     char buffer[header.nbytes + 1];
     //recv_packet (client_sock, buffer.get(), header.nbytes);
-    recv_packet (client_sock, &buffer, header.nbytes);
-    recv_packet (client_sock, &buffer, header.nbytes);
+    recv_packet (client_sock, buffer, header.nbytes);
+    recv_packet (client_sock, buffer, header.nbytes);
     outlog << "received " << header.nbytes << " bytes" << endl;
     //cout << buffer.get();
     cout << buffer;

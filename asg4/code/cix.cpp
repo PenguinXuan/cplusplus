@@ -90,7 +90,7 @@ void cix_get (client_socket& server, string filename) {
         ofstream outfile (filename, std::ios::out | std::ios::binary);
         //auto buffer = make_unique<char[]> (header.nbytes + 1);    //this way does not work on ucsc unix
         char buffer[header.nbytes + 1];
-        recv_packet (server, &buffer, header.nbytes);
+        recv_packet (server, buffer, header.nbytes);
         //recv_packet (server, buffer.get(), header.nbytes);
 
         outlog << "received " << header.nbytes << " bytes" << endl;
@@ -140,7 +140,7 @@ void cix_put (client_socket& server, string filename) {
 
     outlog << "sending header " << header << endl;
     send_packet (server, &header, sizeof header);
-    send_packet (server, &buffer, stat_buf.st_size);
+    send_packet (server, buffer, stat_buf.st_size);
     recv_packet(server, &header, sizeof header);
     outlog << "sent " << stat_buf.st_size << " bytes" << endl;
     infile.close();
