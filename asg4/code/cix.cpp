@@ -169,7 +169,6 @@ int main (int argc, char** argv) {
       outlog << "connecting to " << host << " port " << port << endl;
       client_socket server (host, port);
       outlog << "connected to " << to_string (server) << endl;
-      /*
       for (;;) {
          string line;
          getline (cin, line);
@@ -184,29 +183,16 @@ int main (int argc, char** argv) {
          if (regex_search(line, m, tokens)) {
              command = m[1];
              filename = m[2];
-         } else
+             cout << m[1] << " " << m[2] << endl;
+         } else {
              command = line;
+             cout << "**" << endl;
+
+         }
+
          const auto& itor = command_map.find (command);
          cix_command cmd = itor == command_map.end()
-                         ? cix_command::ERROR : itor->second; */
-       for (;;) {
-           string line;
-           getline (cin, line);
-           // Splits the argument line
-           string command_name{}, file_name{};
-           size_t split_pos = line.find(" ");
-           if (split_pos == string::npos) {
-               command_name = line;
-           } else {
-               command_name = line.substr(0, split_pos);
-               file_name = line.substr(split_pos + 1);
-//            cout << command_name << endl << file_name << endl;
-           }
-           if (cin.eof()) throw cix_exit();
-           outlog << "command " << line << endl;
-           const auto& itor = command_map.find (command_name);
-           cix_command cmd = itor == command_map.end()
-                             ? cix_command::ERROR: itor->second;
+                         ? cix_command::ERROR : itor->second;
          switch (cmd) {
             case cix_command::EXIT:
                throw cix_exit();
