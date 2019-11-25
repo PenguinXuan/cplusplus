@@ -126,18 +126,12 @@ void cix_put (client_socket& server, string filename) {
     header.command = cix_command::PUT;
     strcpy(header.filename, filename.c_str());
     header.nbytes = stat_buf.st_size;
-    cout << "6\n";
 
     outlog << "sending header " << header << endl;
-    cout << "1\n";
     send_packet (server, &header, sizeof header);
-    cout << "2\n";
     send_packet (server, &buffer, stat_buf.st_size);
-    cout << "3\n";
     recv_packet(server, &header, sizeof header);
-    cout << "4\n";
     outlog << "sent " << stat_buf.st_size << " bytes" << endl;
-    cout << "5\n";
     infile.close();
 
     if (header.command == cix_command::NAK) {
