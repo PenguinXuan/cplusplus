@@ -89,7 +89,6 @@ void reply_put(accepted_socket& client_sock, cix_header& header) {
 
     outfile.write(buffer.get(), header.nbytes);
     header.command = cix_command::ACK;
-    header.nbytes = 0;
     memset (header.filename, 0, FILENAME_SIZE);
     outlog << "sending header " << header << endl;
     send_packet (client_sock, &header, sizeof header);
@@ -104,7 +103,6 @@ void reply_rm(accepted_socket& client_sock, cix_header& header) {
         return;
     }
     header.command = cix_command::ACK;
-    header.nbytes = 0;
     memset (header.filename, 0, FILENAME_SIZE);
     outlog << "sending header " << header << endl;
     send_packet (client_sock, &header, sizeof header);
