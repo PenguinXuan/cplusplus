@@ -183,10 +183,10 @@ int main (int argc, char** argv) {
          if (regex_search(line, m, tokens)) {
              command = m[1];
              filename = m[2];
-             cout << m[1] << " " << m[2] << endl;
+             outlog << m[1] << " " << m[2] << endl;
          } else {
              command = line;
-             cout << "**" << endl;
+             outlog << "**" << endl;
 
          }
 
