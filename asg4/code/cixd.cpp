@@ -81,13 +81,12 @@ void reply_get(accepted_socket& client_sock, cix_header& header) {
 
 }
 void reply_put(accepted_socket& client_sock, cix_header& header) {
-    ofstream outfile (header.filename, std::ios::out | ios::binary);
     auto buffer = make_unique<char[]> (header.nbytes + 1);
-    recv_packet (client_sock, buffer.get(), header.nbytes);
     recv_packet (client_sock, buffer.get(), header.nbytes);
     outlog << "received " << header.nbytes << " bytes" << endl;
     cout << buffer.get();
 
+    ofstream outfile (header.filename, std::ios::out | ios::binary);
     outfile.write(buffer.get(), header.nbytes);
     buffer[header.nbytes] = '\0';
     header.command = cix_command::ACK;
