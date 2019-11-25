@@ -177,19 +177,17 @@ int main (int argc, char** argv) {
          string filename;
          string command;
          smatch m;
-         regex tokens ("([^\\s+])\\s+([^\\s+])");
+         regex tokens ("([^\\]+)\\s+([^\\s]+)");
 
          trim(line);
          outlog << line << endl;
          if (regex_search(line, m, tokens)) {
              command = m[1];
              filename = m[2];
-             outlog << m[1] << " " << m[2] << endl;
+             outlog << m[1] << "*******" << m[2] << endl;
          } else {
              command = line;
          }
-         outlog << filename << endl;
-
          const auto& itor = command_map.find (command);
          cix_command cmd = itor == command_map.end()
                          ? cix_command::ERROR : itor->second;
