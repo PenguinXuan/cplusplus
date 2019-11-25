@@ -174,12 +174,15 @@ int main (int argc, char** argv) {
          getline (cin, line);
          if (cin.eof()) throw cix_exit();
          outlog << "command " << line << endl;
+         outlog << "**" << endl;
+         outlog << line << endl;
          string filename;
          string command;
          smatch m;
          regex tokens ("(\\w+)\\s+(\\w+)");
 
          trim(line);
+         outlog << line << endl;
          if (regex_search(line, m, tokens)) {
              command = m[1];
              filename = m[2];
@@ -188,7 +191,7 @@ int main (int argc, char** argv) {
              command = line;
              //outlog << "**" << endl;
          }
-         outlog << command << endl;
+         outlog << filename << endl;
 
          const auto& itor = command_map.find (command);
          cix_command cmd = itor == command_map.end()
