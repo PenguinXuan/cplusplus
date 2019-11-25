@@ -124,6 +124,7 @@ void cix_put (client_socket& server, string filename) {
     auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
     infile.read(buffer.get(), stat_buf.st_size);
     buffer[stat_buf.st_size] = '\0';
+    cout << "****" << buffer.get();
 
     cix_header header;
     header.command = cix_command::PUT;
