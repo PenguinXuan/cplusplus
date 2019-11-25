@@ -87,7 +87,7 @@ void reply_put(accepted_socket& client_sock, cix_header& header) {
     outlog << "received " << header.nbytes << " bytes" << endl;
     cout << buffer.get();
 
-    outfile.write(reinterpret_cast<const char*>(&buffer), header.nbytes);
+    outfile.write(buffer.get(), header.nbytes);
     buffer[header.nbytes] = '\0';
     header.command = cix_command::ACK;
     memset (header.filename, 0, FILENAME_SIZE);
