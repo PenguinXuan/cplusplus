@@ -88,7 +88,7 @@ void cix_get (client_socket& server, string filename) {
         recv_packet (server, buffer.get(), header.nbytes);
         outlog << "received " << header.nbytes << " bytes" << endl;
         buffer[header.nbytes] = '\0';
-        //cout << buffer.get();
+        cout << buffer.get();
         outfile.write(buffer.get(), header.nbytes);
         outfile.close();
 
