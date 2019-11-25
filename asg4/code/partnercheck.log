@@ -1,9 +1,1 @@
-partnercheck: partner = "xlou2"
-partnercheck: ./PARTNER: format OK:
-username = "xlou2"
-passwd   = "*"
-uid      = "249956"
-gid      = "100"
-gecos    = "Xiong Lou"
-home     = "/afs/cats.ucsc.edu/users/u/xlou2"
-shell    = "/bin/bash"
+./mk.build: 6: ./mk.build: partnercheck: not found

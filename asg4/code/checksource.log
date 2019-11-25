@@ -1,5 +1,1 @@
-checksource: line length > 144 characters
-   file "HEADER.html": 1 errors: line 16
-checksource: line length > 72 characters
-   file "HEADER.html": 2 errors: lines 15--16
-checksource: TOTAL COMPLAINTS: 3
+./mk.build: 7: ./mk.build: checksource: not found

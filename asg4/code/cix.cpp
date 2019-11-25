@@ -84,16 +84,16 @@ void cix_get (client_socket& server, string filename) {
         outlog << "server returned " << header << endl;
     } else {
         ofstream outfile (filename, std::ios::out | std::ios::binary);
-        //auto buffer = make_unique<char[]> (header.nbytes + 1);
-        char buffer[header.nbytes + 1];
-        //recv_packet (server, buffer.get(), header.nbytes);
-        recv_packet (server, buffer, header.nbytes);
+        auto buffer = make_unique<char[]> (header.nbytes + 1);
+        //char buffer[header.nbytes + 1];
+        recv_packet (server, buffer.get(), header.nbytes);
+        //recv_packet (server, buffer, header.nbytes);
         outlog << "received " << header.nbytes << " bytes" << endl;
         buffer[header.nbytes] = '\0';
-        //cout << buffer.get();
-        cout << buffer;
-        //outfile.write(buffer.get(), header.nbytes);
-        outfile.write(buffer, header.nbytes);
+        cout << buffer.get();
+        //cout << buffer;
+        outfile.write(buffer.get(), header.nbytes);
+        //outfile.write(buffer, header.nbytes);
         outfile.close();
 
         outlog << "Request GET was successfully completed." << endl;

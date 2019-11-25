@@ -68,18 +68,18 @@ void reply_get(accepted_socket& client_sock, cix_header& header) {
         return;
     }
     infile.seekg(0, std::ios::beg);
-    //auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
-    char buffer[stat_buf.st_size + 1];
+    auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
+    //char buffer[stat_buf.st_size + 1];
     buffer[stat_buf.st_size] = '\0';
-    //infile.read(buffer.get(), stat_buf.st_size);
-    infile.read(buffer, stat_buf.st_size);
+    infile.read(buffer.get(), stat_buf.st_size);
+    //infile.read(buffer, stat_buf.st_size);
     header.command = cix_command::FILEOUT;
     header.nbytes = stat_buf.st_size;
     memset (header.filename, 0, FILENAME_SIZE);
     outlog << "sending header " << header << endl;
     send_packet (client_sock, &header, sizeof header);
-    //send_packet (client_sock, &buffer, stat_buf.st_size);
-    send_packet (client_sock, buffer, stat_buf.st_size);
+    send_packet (client_sock, &buffer, stat_buf.st_size);
+    //send_packet (client_sock, buffer, stat_buf.st_size);
     outlog << "sent " << stat_buf.st_size << " bytes" << endl;
 
 }
