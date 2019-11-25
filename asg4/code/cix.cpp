@@ -69,7 +69,8 @@ void cix_get (client_socket& server, string filename) {
     if (filename.size() >= FILENAME_SIZE)
         outlog << filename << ": filename is too long.\n";
     if (filename.find('/') != string::npos)
-        outlog << filename << ": filename can't have any slash characters in it.\n";
+        outlog << filename <<
+        ": filename can't have any slash characters in it.\n";
 
     cix_header header;
     header.command = cix_command::GET;
@@ -87,7 +88,7 @@ void cix_get (client_socket& server, string filename) {
         recv_packet (server, buffer.get(), header.nbytes);
         outlog << "received " << header.nbytes << " bytes" << endl;
         buffer[header.nbytes] = '\0';
-        cout << buffer.get();
+        //cout << buffer.get();
         outfile.write(buffer.get(), header.nbytes);
         outfile.close();
 
@@ -102,7 +103,8 @@ void cix_put (client_socket& server, string filename) {
         return;
     }
     if (filename.find('/') != string::npos) {
-        outlog << filename << ": filename can't have any slash characters in it.\n";
+        outlog << filename <<
+        ": filename can't have any slash characters in it.\n";
         return;
     }
 
@@ -115,6 +117,7 @@ void cix_put (client_socket& server, string filename) {
                << strerror (errno) << endl;
         return;
     }
+    cout << "*****test1" << endl;
     auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
     infile.read(reinterpret_cast<char*>(&buffer), stat_buf.st_size);
     buffer[stat_buf.st_size] = '\0';
@@ -145,7 +148,8 @@ void cix_rm (client_socket& server, string filename) {
     if (filename.size() >= FILENAME_SIZE)
         outlog << filename << ": filename is too long.\n";
     if (filename.find('/') != string::npos)
-        outlog << filename << ": filename can't have any slash characters in it.\n";
+        outlog << filename <<
+        ": filename can't have any slash characters in it.\n";
 
     cix_header header;
     header.command = cix_command::RM;
