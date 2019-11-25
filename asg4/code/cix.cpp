@@ -117,9 +117,10 @@ void cix_put (client_socket& server, string filename) {
                << strerror (errno) << endl;
         return;
     }
-    cout << "*****test1" << endl;
+
     auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
     infile.read(reinterpret_cast<char*>(&buffer), stat_buf.st_size);
+    cout << "*****test1" << endl;
     buffer[stat_buf.st_size] = '\0';
 
     cix_header header;
