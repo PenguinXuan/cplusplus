@@ -90,7 +90,10 @@ void cix_get (client_socket& server, string filename) {
         cout << buffer.get();
         outfile.write(buffer.get(), header.nbytes);
         outfile.close();
+
+        outlog << "Request GET was successfully completed." << endl;
     }
+
 }
 
 void cix_put (client_socket& server, string filename) {
@@ -102,34 +105,40 @@ void cix_put (client_socket& server, string filename) {
         outlog << filename << ": filename can't have any slash characters in it.\n";
         return;
     }
+
     ifstream infile (filename, std::ios::in | ios::binary);
     const char* file = filename.c_str();
     struct stat stat_buf;
     int status = stat (file, &stat_buf);
     if (status != 0) {
-        outlog << "open " << filename << " failed: "<< ": "
+        outlog << filename << ": "
                << strerror (errno) << endl;
         return;
     }
+    auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
+    infile.read(reinterpret_cast<char*>(&buffer), stat_buf.st_size);
+    buffer[stat_buf.st_size] = '\0';
+
     cix_header header;
+    header.command = cix_command::PUT;
     strcpy(header.filename, filename.c_str());
     header.nbytes = stat_buf.st_size;
-    memset (header.filename, 0, FILENAME_SIZE);
-    header.command = cix_command::PUT;
-    auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
-    buffer[stat_buf.st_size] = '\0';
-    infile.read(reinterpret_cast<char*>(&buffer), stat_buf.st_size);
+
     outlog << "sending header " << header << endl;
     send_packet (server, &header, sizeof header);
     send_packet (server, &buffer, stat_buf.st_size);
+    recv_packet(server, &header, sizeof header);
     outlog << "sent " << stat_buf.st_size << " bytes" << endl;
-    recv_packet (server, &header, sizeof header);
-    outlog << "received header " << header << endl;
-    if (header.command != cix_command::ACK) {
+    infile.close();
+
+    if (header.command == cix_command::NAK) {
         outlog << "sent PUT, server did not return ACK" << endl;
         outlog << "server returned " << header << endl;
     }
-    infile.close();
+    if (header.command == cix_command::ACK) {
+        outlog << "Request PUT was successfully completed." << endl;
+    }
+
 }
 
 void cix_rm (client_socket& server, string filename) {
@@ -146,9 +155,12 @@ void cix_rm (client_socket& server, string filename) {
     send_packet (server, &header, sizeof header);
     recv_packet (server, &header, sizeof header);
     outlog << "received header " << header << endl;
-    if (header.command != cix_command::ACK) {
+    if (header.command == cix_command::NAK) {
         outlog << "sent RM, server did not return ACK" << endl;
         outlog << "server returned " << header << endl;
+    }
+    if (header.command == cix_command::ACK) {
+        outlog << "Request RM was successfully completed." << endl;
     }
 }
 

@@ -81,33 +81,23 @@ void reply_get(accepted_socket& client_sock, cix_header& header) {
 }
 void reply_put(accepted_socket& client_sock, cix_header& header) {
     ofstream outfile (header.filename, std::ios::out | ios::binary);
-    const char* filename = header.filename;
-    struct stat stat_buf;
-    int status = stat (filename, &stat_buf);
-    if (status != 0) {
-        outlog << "open " << filename << " failed: "
-               << strerror (errno) << endl;
-        header.command = cix_command::NAK;
-        header.nbytes = errno;
-        send_packet (client_sock, &header, sizeof header);
-        return;
-    }
-    outlog << "***2" << endl;
     auto buffer = make_unique<char[]> (header.nbytes + 1);
     recv_packet (client_sock, buffer.get(), header.nbytes);
     outlog << "received " << header.nbytes << " bytes" << endl;
     buffer[header.nbytes] = '\0';
     //cout << buffer.get();
-    outfile.write(reinterpret_cast<char*>(&buffer), header.nbytes);
+
+    outfile.write(buffer.get(), header.nbytes);
     header.command = cix_command::ACK;
     header.nbytes = 0;
+    memset (header.filename, 0, FILENAME_SIZE);
     outlog << "sending header " << header << endl;
     send_packet (client_sock, &header, sizeof header);
 }
 
 void reply_rm(accepted_socket& client_sock, cix_header& header) {
     if (unlink(header.filename)) {
-        outlog << "rm " << header.filename << " failed: " << strerror (errno) << endl;
+        outlog << header.filename << ": " << strerror (errno) << endl;
         header.command = cix_command::NAK;
         header.nbytes = errno;
         send_packet (client_sock, &header, sizeof header);
@@ -118,7 +108,6 @@ void reply_rm(accepted_socket& client_sock, cix_header& header) {
     memset (header.filename, 0, FILENAME_SIZE);
     outlog << "sending header " << header << endl;
     send_packet (client_sock, &header, sizeof header);
-
 }
 
 
