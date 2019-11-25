@@ -65,13 +65,11 @@ void reply_get(accepted_socket& client_sock, cix_header& header) {
         header.command = cix_command::NAK;
         header.nbytes = errno;
         send_packet (client_sock, &header, sizeof header);
-        outlog << "cixd test" << endl;
         return;
     }
-    auto buffer = make_unique<char[]> (header.nbytes + 1);
-    buffer[header.nbytes] = '\0';
+    auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
+    buffer[stat_buf.st_size] = '\0';
     infile.read(reinterpret_cast<char*>(&buffer), stat_buf.st_size);
-
     header.command = cix_command::FILEOUT;
     header.nbytes = stat_buf.st_size;
     memset (header.filename, 0, FILENAME_SIZE);

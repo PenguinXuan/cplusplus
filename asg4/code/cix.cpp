@@ -82,16 +82,14 @@ void cix_get (client_socket& server, string filename) {
         outlog << "sent GET, server did not return FILEOUT" << endl;
         outlog << "server returned " << header << endl;
     } else {
+        ofstream outfile (filename);
         auto buffer = make_unique<char[]> (header.nbytes + 1);
         recv_packet (server, buffer.get(), header.nbytes);
         outlog << "received " << header.nbytes << " bytes" << endl;
         buffer[header.nbytes] = '\0';
         cout << buffer.get();
-
-        ofstream outfile (filename);
         outfile.write(buffer.get(), header.nbytes);
         outfile.close();
-
     }
 }
 
@@ -184,7 +182,7 @@ int main (int argc, char** argv) {
          if (regex_search(line, m, tokens)) {
              command = m[1];
              filename = m[2];
-             outlog << m[1] << "*******" << m[2] << endl;
+             //outlog << m[1] << "*******" << m[2] << endl;
          } else {
              command = line;
          }
