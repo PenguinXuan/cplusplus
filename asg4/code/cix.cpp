@@ -90,6 +90,7 @@ void cix_get (client_socket& server, string filename) {
         cout << buffer.get();
         outfile.write(buffer.get(), header.nbytes);
         outfile.close();
+        outlog << "test cix2" << endl;
     }
 }
 
@@ -168,6 +169,7 @@ int main (int argc, char** argv) {
       client_socket server (host, port);
       outlog << "connected to " << to_string (server) << endl;
       for (;;) {
+         outlog << "test cix" << endl;
          string line;
          getline (cin, line);
          if (cin.eof()) throw cix_exit();
@@ -182,7 +184,6 @@ int main (int argc, char** argv) {
          if (regex_search(line, m, tokens)) {
              command = m[1];
              filename = m[2];
-             //outlog << m[1] << "*******" << m[2] << endl;
          } else {
              command = line;
          }
