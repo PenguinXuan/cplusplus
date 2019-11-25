@@ -69,7 +69,7 @@ void reply_get(accepted_socket& client_sock, cix_header& header) {
     }
     auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
     buffer[stat_buf.st_size] = '\0';
-    infile.read(buffer.get(), stat_buf.st_size);
+    infile.read(reinterpret_cast<char *>(&buffer), stat_buf.st_size);
     header.command = cix_command::FILEOUT;
     header.nbytes = stat_buf.st_size;
     memset (header.filename, 0, FILENAME_SIZE);
@@ -87,7 +87,7 @@ void reply_put(accepted_socket& client_sock, cix_header& header) {
     buffer[header.nbytes] = '\0';
     cout << buffer.get();
 
-    outfile.write(buffer.get(), header.nbytes);
+    outfile.write(reinterpret_cast<const char *>(&buffer), header.nbytes);
     header.command = cix_command::ACK;
     memset (header.filename, 0, FILENAME_SIZE);
     outlog << "sending header " << header << endl;

@@ -119,7 +119,7 @@ void cix_put (client_socket& server, string filename) {
     }
 
     auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
-    infile.read(buffer.get(), stat_buf.st_size);
+    infile.read(reinterpret_cast<char *>(&buffer), stat_buf.st_size);
     buffer[stat_buf.st_size] = '\0';
 
     cix_header header;
