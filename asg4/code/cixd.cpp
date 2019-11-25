@@ -92,6 +92,7 @@ void reply_put(accepted_socket& client_sock, cix_header& header) {
         send_packet (client_sock, &header, sizeof header);
         return;
     }
+    outlog << "***2" << endl;
     auto buffer = make_unique<char[]> (header.nbytes + 1);
     recv_packet (client_sock, buffer.get(), header.nbytes);
     outlog << "received " << header.nbytes << " bytes" << endl;
@@ -137,6 +138,7 @@ void run_server (accepted_socket& client_sock) {
                reply_get(client_sock, header);
                break;
             case cix_command::PUT:
+               outlog << "***1" << endl;
                reply_put(client_sock, header);
                break;
             case cix_command::RM:

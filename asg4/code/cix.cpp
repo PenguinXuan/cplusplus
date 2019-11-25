@@ -114,6 +114,7 @@ void cix_put (client_socket& server, string filename) {
     cix_header header;
     strcpy(header.filename, filename.c_str());
     header.nbytes = stat_buf.st_size;
+    memset (header.filename, 0, FILENAME_SIZE);
     header.command = cix_command::PUT;
     auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
     buffer[stat_buf.st_size] = '\0';
