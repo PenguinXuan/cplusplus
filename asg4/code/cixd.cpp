@@ -67,25 +67,32 @@ void reply_get(accepted_socket& client_sock, cix_header& header) {
         send_packet (client_sock, &header, sizeof header);
         return;
     }
-    auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
+    infile.seekg(0, std::ios::beg);
+    //auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
+    char buffer[stat_buf.st_size + 1];
     buffer[stat_buf.st_size] = '\0';
-    infile.read(buffer.get(), stat_buf.st_size);
+    //infile.read(buffer.get(), stat_buf.st_size);
+    infile.read(buffer, stat_buf.st_size);
     header.command = cix_command::FILEOUT;
     header.nbytes = stat_buf.st_size;
     memset (header.filename, 0, FILENAME_SIZE);
     outlog << "sending header " << header << endl;
     send_packet (client_sock, &header, sizeof header);
-    send_packet (client_sock, &buffer, stat_buf.st_size);
+    //send_packet (client_sock, &buffer, stat_buf.st_size);
+    send_packet (client_sock, buffer, stat_buf.st_size);
     outlog << "sent " << stat_buf.st_size << " bytes" << endl;
 
 }
 void reply_put(accepted_socket& client_sock, cix_header& header) {
     ofstream outfile (header.filename, std::ios::out | ios::binary);
-    auto buffer = make_unique<char[]> (header.nbytes + 1);
-    recv_packet (client_sock, buffer.get(), header.nbytes);
+    //auto buffer = make_unique<char[]> (header.nbytes + 1);
+    char buffer[header.nbytes + 1];
+    //recv_packet (client_sock, buffer.get(), header.nbytes);
+    recv_packet (client_sock, buffer, header.nbytes);
     outlog << "received " << header.nbytes << " bytes" << endl;
     buffer[header.nbytes] = '\0';
-    cout << buffer.get();
+    //cout << buffer.get();
+    cout << buffer;
 
     outfile.write(reinterpret_cast<const char*>(&buffer), header.nbytes);
     header.command = cix_command::ACK;
