@@ -65,6 +65,7 @@ void reply_get(accepted_socket& client_sock, cix_header& header) {
         header.command = cix_command::NAK;
         header.nbytes = errno;
         send_packet (client_sock, &header, sizeof header);
+        outlog << "cixd test" << endl;
         return;
     }
     auto buffer = make_unique<char[]> (header.nbytes + 1);
