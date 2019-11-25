@@ -173,13 +173,11 @@ int main (int argc, char** argv) {
          string line;
          getline (cin, line);
          if (cin.eof()) throw cix_exit();
-         outlog << "command*******" << line << endl;
-         outlog << "**" << endl;
-         outlog << line << endl;
+         outlog << "command " << line << endl;
          string filename;
          string command;
          smatch m;
-         regex tokens ("(\\w+)\\s+(\\w+)");
+         regex tokens ("([^\\s])\\s+([^\\s])");
 
          trim(line);
          outlog << line << endl;
