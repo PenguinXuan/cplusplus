@@ -66,11 +66,15 @@ void cix_ls (client_socket& server) {
 }
 
 void cix_get (client_socket& server, string filename) {
-    if (filename.size() >= FILENAME_SIZE)
+    if (filename.size() >= FILENAME_SIZE) {
         outlog << filename << ": filename is too long.\n";
-    if (filename.find('/') != string::npos)
+        return;
+    }
+    if (filename.find('/') != string::npos) {
         outlog << filename <<
-        ": filename can't have any slash characters in it.\n";
+               ": filename can't have any slash characters in it.\n";
+        return;
+    }
 
     cix_header header;
     header.command = cix_command::GET;
@@ -85,15 +89,11 @@ void cix_get (client_socket& server, string filename) {
     } else {
         ofstream outfile (filename, std::ios::out | std::ios::binary);
         auto buffer = make_unique<char[]> (header.nbytes + 1);
-        //char buffer[header.nbytes + 1];
         recv_packet (server, buffer.get(), header.nbytes);
-        //recv_packet (server, buffer, header.nbytes);
         outlog << "received " << header.nbytes << " bytes" << endl;
         buffer[header.nbytes] = '\0';
         cout << buffer.get();
-        //cout << buffer;
         outfile.write(buffer.get(), header.nbytes);
-        //outfile.write(buffer, header.nbytes);
         outfile.close();
 
         outlog << "Request GET was successfully completed." << endl;
@@ -118,14 +118,12 @@ void cix_put (client_socket& server, string filename) {
     int status = stat (file, &stat_buf);
     if (status != 0) {
         outlog << filename << ": "
-               << strerror (errno) << endl;
+        << strerror (errno) << endl;
         return;
     }
 
-    //auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
-    char buffer[stat_buf.st_size + 1];
-    //infile.read(buffer.get(), stat_buf.st_size);
-    infile.read(buffer, stat_buf.st_size);
+    auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
+    infile.read(buffer.get(), stat_buf.st_size);
     buffer[stat_buf.st_size] = '\0';
 
     cix_header header;
@@ -135,8 +133,7 @@ void cix_put (client_socket& server, string filename) {
 
     outlog << "sending header " << header << endl;
     send_packet (server, &header, sizeof header);
-    //send_packet (server, &buffer, stat_buf.st_size);
-    send_packet (server, buffer, stat_buf.st_size);
+    send_packet (server, &buffer, stat_buf.st_size);
     recv_packet(server, &header, sizeof header);
     outlog << "sent " << stat_buf.st_size << " bytes" << endl;
     infile.close();
@@ -161,7 +158,6 @@ void cix_rm (client_socket& server, string filename) {
     cix_header header;
     header.command = cix_command::RM;
     strcpy(header.filename, filename.c_str());
-    header.nbytes = 0;
     outlog << "sending header " << header << endl;
     send_packet (server, &header, sizeof header);
     recv_packet (server, &header, sizeof header);
@@ -211,7 +207,6 @@ int main (int argc, char** argv) {
          regex tokens ("(\\w+)\\s+(.+)");
 
          trim(line);
-         outlog << line << endl;
          if (regex_search(line, m, tokens)) {
              command = m[1];
              filename = m[2];
