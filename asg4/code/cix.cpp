@@ -102,7 +102,6 @@ void cix_put (client_socket& server, string filename) {
         outlog << filename << ": filename can't have any slash characters in it.\n";
         return;
     }
-    cix_header header;
     ifstream infile (filename, std::ios::in | ios::binary);
     const char* file = filename.c_str();
     struct stat stat_buf;
@@ -112,14 +111,17 @@ void cix_put (client_socket& server, string filename) {
                << strerror (errno) << endl;
         return;
     }
+    cix_header header;
+    strcpy(header.filename, filename.c_str());
+    header.nbytes = stat_buf.st_size;
+    header.command = cix_command::PUT;
     auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
     buffer[stat_buf.st_size] = '\0';
-    header.command = cix_command::PUT;
-    strcpy(header.filename, filename.c_str());
     infile.read(reinterpret_cast<char*>(&buffer), stat_buf.st_size);
     outlog << "sending header " << header << endl;
     send_packet (server, &header, sizeof header);
     send_packet (server, &buffer, stat_buf.st_size);
+    outlog << "sent " << stat_buf.st_size << " bytes" << endl;
     recv_packet (server, &header, sizeof header);
     outlog << "received header " << header << endl;
     if (header.command != cix_command::ACK) {
