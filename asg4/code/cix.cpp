@@ -88,12 +88,17 @@ void cix_get (client_socket& server, string filename) {
         outlog << "server returned " << header << endl;
     } else {
         ofstream outfile (filename, std::ios::out | std::ios::binary);
-        auto buffer = make_unique<char[]> (header.nbytes + 1);
-        recv_packet (server, buffer.get(), header.nbytes);
+        //auto buffer = make_unique<char[]> (header.nbytes + 1);    //this way does not work on ucsc unix
+        char buffer[header.nbytes + 1];
+        recv_packet (server, &buffer, header.nbytes);
+        //recv_packet (server, buffer.get(), header.nbytes);
+
         outlog << "received " << header.nbytes << " bytes" << endl;
         buffer[header.nbytes] = '\0';
-        cout << buffer.get();
-        outfile.write(buffer.get(), header.nbytes);
+        //cout << buffer.get();
+        cout << buffer;
+        //outfile.write(buffer.get(), header.nbytes);
+        outfile.write(buffer, header.nbytes);
         outfile.close();
 
         outlog << "Request GET was successfully completed." << endl;
@@ -122,8 +127,10 @@ void cix_put (client_socket& server, string filename) {
         return;
     }
 
-    auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
-    infile.read(buffer.get(), stat_buf.st_size);
+    //auto buffer = make_unique<char[]> (stat_buf.st_size + 1);
+    char buffer[stat_buf.st_size + 1];
+    //infile.read(buffer.get(), stat_buf.st_size);
+    infile.read(buffer, stat_buf.st_size);
     buffer[stat_buf.st_size] = '\0';
 
     cix_header header;
