@@ -78,7 +78,7 @@ void cix_get (client_socket& server, string filename) {
     send_packet (server, &header, sizeof header);
     recv_packet (server, &header, sizeof header);
     outlog << "received header " << header << endl;
-    if (header.command != cix_command::NAK) {
+    if (header.command != cix_command::FILEOUT) {
         outlog << "sent GET, server did not return FILEOUT" << endl;
         outlog << "server returned " << header << endl;
     } else {
