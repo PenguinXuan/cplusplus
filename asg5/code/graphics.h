@@ -25,7 +25,8 @@ class object {
       bool selected  = false;
       void draw();
       void draw_border();
-      void move (GLfloat delta_x, GLfloat delta_y, int window__w, int window_h);
+      void move (GLfloat delta_x, GLfloat delta_y,
+              int window__w, int window_h);
 };
 
 class mouse {

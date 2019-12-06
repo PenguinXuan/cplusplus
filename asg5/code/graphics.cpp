@@ -33,7 +33,8 @@ void object::draw_border() {
     pshape->draw_border(center, color);
 }
 
-void object::move (GLfloat delta_x, GLfloat delta_y, int window_w, int window_h) {
+void object::move (GLfloat delta_x, GLfloat delta_y,
+        int window_w, int window_h) {
    if (center.xpos > window_w) center.xpos = 0;
    if (center.ypos > window_h) center.ypos = 0;
    if (center.xpos < 0) center.xpos = window_w;
@@ -117,7 +118,8 @@ void window::reshape (int width_, int height_) {
 // Executed when a regular keyboard key is pressed.
 void window::keyboard (GLubyte key, int x, int y) {
    enum {BS = 8, TAB = 9, ESC = 27, SPACE = 32, DEL = 127};
-   DEBUGF ('g', "key=" << unsigned (key) << ", x=" << x << ", y=" << y);
+   DEBUGF ('g', "key="
+   << unsigned (key) << ", x=" << x << ", y=" << y);
    window::mus.set (x, y);
    switch (key) {
       case 'Q': case 'q': case ESC:
