@@ -1,4 +1,6 @@
 // $Id: main.cpp,v 1.3 2019-05-15 18:02:12-07 - - $
+// By: Zhuoxuan Wang (zwang437@ucsc.edu)
+// and Xiong Lou (xlou2@ucsc.edu)
 
 #include <fstream>
 #include <iostream>

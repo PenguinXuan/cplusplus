@@ -1,4 +1,6 @@
 // $Id: shape.h,v 1.2 2016-05-04 16:26:26-07 - - $
+// By: Zhuoxuan Wang (zwang437@ucsc.edu)
+// and Xiong Lou (xlou2@ucsc.edu)
 
 #ifndef __SHAPE_H__
 #define __SHAPE_H__
@@ -36,6 +38,7 @@ struct vertex {GLfloat xpos; GLfloat ypos; };
 using vertex_list = vector<vertex>;
 using shape_ptr = shared_ptr<shape>; 
 
+void* find_fontcode(const string&);
 //
 // Abstract base class for all shapes in this system.
 //
@@ -51,6 +54,8 @@ class shape {
       shape& operator= (shape&&) = delete; // Prevent moving.
       virtual ~shape() {}
       virtual void draw (const vertex&, const rgbcolor&) const = 0;
+      //virtual void draw_border (const vertex&, const rgbcolor&) const = 0;
+     // virtual void display_num (const vertex&, const rgbcolor&, const size_t&) const = 0;
       virtual void show (ostream&) const;
 };
 
@@ -73,6 +78,7 @@ class text: public shape {
    public:
       text (void* glut_bitmap_font, const string& textdata);
       virtual void draw (const vertex&, const rgbcolor&) const override;
+      //virtual void draw_border (const vertex&, const rgbcolor&) const override;
       virtual void show (ostream&) const override;
 };
 
@@ -86,6 +92,7 @@ class ellipse: public shape {
    public:
       ellipse (GLfloat width, GLfloat height);
       virtual void draw (const vertex&, const rgbcolor&) const override;
+      //virtual void draw_border (const vertex&, const rgbcolor&) const override;
       virtual void show (ostream&) const override;
 };
 
@@ -104,6 +111,7 @@ class polygon: public shape {
    public:
       polygon (const vertex_list& vertices);
       virtual void draw (const vertex&, const rgbcolor&) const override;
+      //virtual void draw_border (const vertex&, const rgbcolor&) const override;
       virtual void show (ostream&) const override;
 };
 
@@ -127,7 +135,18 @@ class diamond: public polygon {
       diamond (const GLfloat width, const GLfloat height);
 };
 
+class triangle: public polygon {
+   public:
+      triangle (const vertex_list& vertices);
+};
+
+class equilateral: public triangle {
+   public:
+      equilateral (const GLfloat width);
+};
+
 ostream& operator<< (ostream& out, const shape&);
+
 
 #endif
 

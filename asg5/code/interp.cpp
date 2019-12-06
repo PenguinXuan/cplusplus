@@ -1,4 +1,6 @@
 // $Id: interp.cpp,v 1.3 2019-03-19 16:18:22-07 - - $
+// By: Zhuoxuan Wang (zwang437@ucsc.edu)
+// and Xiong Lou (xlou2@ucsc.edu)
 
 #include <memory>
 #include <string>
@@ -30,12 +32,16 @@ interpreter::interp_map {
 
 unordered_map<string,interpreter::factoryfn>
 interpreter::factory_map {
-   {"text"     , &interpreter::make_text     },
-   {"ellipse"  , &interpreter::make_ellipse  },
-   {"circle"   , &interpreter::make_circle   },
-   {"polygon"  , &interpreter::make_polygon  },
-   {"rectangle", &interpreter::make_rectangle},
-   {"square"   , &interpreter::make_square   },
+   {"text"        , &interpreter::make_text        },
+   {"ellipse"     , &interpreter::make_ellipse     },
+   {"circle"      , &interpreter::make_circle      },
+   {"polygon"     , &interpreter::make_polygon     },
+   {"rectangle"   , &interpreter::make_rectangle   },
+   {"square"      , &interpreter::make_square      },
+   {"diamond"     , &interpreter::make_diamond     },
+   {"triangle"    , &interpreter::make_triangle    },
+   {"equilateral" , &interpreter::make_equilateral }
+
 };
 
 interpreter::shape_map interpreter::objmap;
@@ -63,7 +69,6 @@ void interpreter::do_define (param begin, param end) {
    objmap.emplace (name, make_shape (++begin, end));
 }
 
-
 void interpreter::do_draw (param begin, param end) {
    DEBUGF ('f', range (begin, end));
    if (end - begin != 4) throw runtime_error ("syntax error");
@@ -91,40 +96,82 @@ shape_ptr interpreter::make_shape (param begin, param end) {
 
 shape_ptr interpreter::make_text (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   auto font = fontcode.find(*begin);
-   if (font == fontcode.end()) {
-       throw runtime_error (*begin + ": no such font");
-   }
+   void* font = find_fontcode(*begin);
    string text_str;
    for (auto itor = ++begin; itor != end; ++itor) {
        text_str += *itor;
        text_str += " ";
    }
-   return make_shared<text> (font->second, text_str);
+   return make_shared<text> (font, text_str);
 }
 
 shape_ptr interpreter::make_ellipse (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   return make_shared<ellipse> (GLfloat(), GLfloat());
+   if (end - begin != 2) throw runtime_error ("syntax error");
+   GLfloat w =  stof (begin[0]);
+   GLfloat h = stof (begin[1]);
+   return make_shared<ellipse> (w, h);
 }
 
 shape_ptr interpreter::make_circle (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   return make_shared<circle> (GLfloat());
+   if (end - begin != 1) throw runtime_error ("syntax error");
+   GLfloat d = stof (begin[0]);
+   return make_shared<circle> (d);
 }
 
 shape_ptr interpreter::make_polygon (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   return make_shared<polygon> (vertex_list());
+   if ((end - begin) < 6 || (end - begin) % 2 != 0) throw runtime_error ("syntax error");
+   vertex_list vertices;
+   while (begin != end) {
+       GLfloat xPos = stof(*begin++);
+       GLfloat yPos = stof(*begin++);
+       vertices.push_back({xPos, yPos});
+   }
+   return make_shared<polygon> (vertices);
 }
 
 shape_ptr interpreter::make_rectangle (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   return make_shared<rectangle> (GLfloat(), GLfloat());
+   if (end - begin != 2) throw runtime_error ("syntax error");
+   GLfloat w =  stof (begin[0]);
+   GLfloat h = stof (begin[1]);
+   return make_shared<rectangle> (w, h);
 }
 
 shape_ptr interpreter::make_square (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   return make_shared<square> (GLfloat());
+   if (end - begin != 1) throw runtime_error ("syntax error");
+   GLfloat w = stof (begin[0]);
+   return make_shared<square> (w);
+}
+
+shape_ptr interpreter::make_diamond (param begin, param end) {
+    DEBUGF ('f', range (begin, end));
+    if (end - begin != 2) throw runtime_error ("syntax error");
+    GLfloat w = stof (begin[0]);
+    GLfloat h = stof (begin[1]);
+    return make_shared<diamond> (w, h);
+}
+
+
+shape_ptr interpreter::make_triangle (param begin, param end) {
+    DEBUGF ('f', range (begin, end));
+    if (end - begin != 6) throw runtime_error ("syntax error");
+    vertex_list vertices;
+    while (begin != end) {
+        GLfloat xPos = stof(*begin++);
+        GLfloat yPos = stof(*begin++);
+        vertices.push_back({xPos, yPos});
+    }
+    return make_shared<triangle> (vertices);
+}
+
+shape_ptr interpreter::make_equilateral(param begin, param end) {
+    DEBUGF ('f', range (begin, end));
+    if (end - begin != 1) throw runtime_error ("syntax error");
+    GLfloat w = stof (begin[0]);
+    return make_shared<equilateral> (w);
 }
 
