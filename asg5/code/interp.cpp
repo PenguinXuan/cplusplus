@@ -123,7 +123,8 @@ shape_ptr interpreter::make_circle (param begin, param end) {
 
 shape_ptr interpreter::make_polygon (param begin, param end) {
    DEBUGF ('f', range (begin, end));
-   if ((end - begin) < 6 || (end - begin) % 2 != 0) throw runtime_error ("syntax error");
+   if ((end - begin) < 6 || (end - begin) % 2 != 0)
+       throw runtime_error ("syntax error");
    vertex_list vertices;
    while (begin != end) {
        GLfloat xPos = stof(*begin++);

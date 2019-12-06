@@ -75,7 +75,8 @@ class window {
       static void setHeight (int height_) { height = height_; }
       static int getWidth () { return width; }
       static int getHeight() { return height; }
-      static void setThickness (int thickness_) { thickness = thickness_; };
+      static void setThickness (int thickness_)
+      { thickness = thickness_; };
       static int getThickness () { return thickness; };
       static void setMoveby (int moveby_) { moveby = moveby_; };
       static void main();

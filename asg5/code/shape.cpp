@@ -103,7 +103,7 @@ void text::draw (const vertex& center, const rgbcolor& color) const {
    glutBitmapString(glut_bitmap_font, text);
 }
 
-void text::draw_border (const vertex& center, const rgbcolor& color) const {
+void text::draw_border(const vertex& center, const rgbcolor& color)const{
     DEBUGF ('d', this << "(" << center << "," << color << ")");
 }
 
@@ -121,7 +121,7 @@ void ellipse::draw (const vertex& center, const rgbcolor& color) const {
 
 }
 
-void ellipse::draw_border (const vertex& center, const rgbcolor& color) const {
+void ellipse::draw_border(const vertex& center,const rgbcolor& color)const {
     DEBUGF ('d', this << "(" << center << "," << color << ")");
     const GLfloat delta = 2.0 * M_PI / 32.0;
     glLineWidth(window::getThickness());
@@ -135,7 +135,7 @@ void ellipse::draw_border (const vertex& center, const rgbcolor& color) const {
     glEnd();
 }
 
-void polygon::draw (const vertex& center, const rgbcolor& color) const {
+void polygon::draw (const vertex& center,const rgbcolor& color) const {
     DEBUGF ('d', this << "(" << center << "," << color << ")");
     glBegin(GL_POLYGON);
     glColor3ubv(color.ubvec);
@@ -145,7 +145,7 @@ void polygon::draw (const vertex& center, const rgbcolor& color) const {
     glEnd();
 }
 
-void polygon::draw_border (const vertex& center, const rgbcolor& color) const {
+void polygon::draw_border(const vertex& center,const rgbcolor& color)const {
     DEBUGF ('d', this << "(" << center << "," << color << ")");
     glBegin(GL_LINE_LOOP);
     glColor3ubv(color.ubvec);

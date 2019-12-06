@@ -56,7 +56,6 @@ class shape {
       virtual void draw (const vertex&, const rgbcolor&) const = 0;
       virtual void draw_border(const vertex&, const rgbcolor&)
       const = 0;
-     // virtual void display_num (const vertex&, const rgbcolor&, const size_t&) const = 0;
       virtual void show (ostream&) const;
 };
 
