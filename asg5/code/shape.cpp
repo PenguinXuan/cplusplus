@@ -9,6 +9,7 @@ using namespace std;
 
 #include "shape.h"
 #include "util.h"
+#include "graphics.h"
 
 static unordered_map<void*,string> fontname {
    {GLUT_BITMAP_8_BY_13       , "Fixed-8x13"    },
@@ -102,6 +103,10 @@ void text::draw (const vertex& center, const rgbcolor& color) const {
    glutBitmapString(glut_bitmap_font, text);
 }
 
+void text::draw_border (const vertex& center, const rgbcolor& color) const {
+    DEBUGF ('d', this << "(" << center << "," << color << ")");
+}
+
 void ellipse::draw (const vertex& center, const rgbcolor& color) const {
    DEBUGF ('d', this << "(" << center << "," << color << ")");
    const GLfloat delta = 2.0 * M_PI / 32.0;
@@ -116,6 +121,20 @@ void ellipse::draw (const vertex& center, const rgbcolor& color) const {
 
 }
 
+void ellipse::draw_border (const vertex& center, const rgbcolor& color) const {
+    DEBUGF ('d', this << "(" << center << "," << color << ")");
+    const GLfloat delta = 2.0 * M_PI / 32.0;
+    glLineWidth(window::getThickness());
+    glBegin(GL_LINE_LOOP);
+    glColor3ubv(color.ubvec);
+    for (GLfloat theta = 0; theta < 2.0 * M_PI; theta += delta) {
+        GLfloat xpos = dimension.xpos / 2 * cos (theta) + center.xpos;
+        GLfloat ypos = dimension.ypos / 2 * sin (theta) + center.ypos;
+        glVertex2f(xpos, ypos);
+    }
+    glEnd();
+}
+
 void polygon::draw (const vertex& center, const rgbcolor& color) const {
     DEBUGF ('d', this << "(" << center << "," << color << ")");
     glBegin(GL_POLYGON);
@@ -126,23 +145,15 @@ void polygon::draw (const vertex& center, const rgbcolor& color) const {
     glEnd();
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void polygon::draw_border (const vertex& center, const rgbcolor& color) const {
+    DEBUGF ('d', this << "(" << center << "," << color << ")");
+    glBegin(GL_LINE_LOOP);
+    glColor3ubv(color.ubvec);
+    for (const auto &v : vertices) {
+        glVertex2f(v.xpos + center.xpos, v.ypos + center.ypos);
+    }
+    glEnd();
+}
 
 void shape::show (ostream& out) const {
    out << this << "->" << demangle (*this) << ": ";

@@ -28,6 +28,8 @@ unordered_map<string,interpreter::interpreterfn>
 interpreter::interp_map {
    {"define" , &interpreter::do_define },
    {"draw"   , &interpreter::do_draw   },
+   {"border" , &interpreter::do_draw_border},
+   {"moveby" , &interpreter::do_moveby }
 };
 
 unordered_map<string,interpreter::factoryfn>
@@ -41,7 +43,6 @@ interpreter::factory_map {
    {"diamond"     , &interpreter::make_diamond     },
    {"triangle"    , &interpreter::make_triangle    },
    {"equilateral" , &interpreter::make_equilateral }
-
 };
 
 interpreter::shape_map interpreter::objmap;
@@ -175,3 +176,16 @@ shape_ptr interpreter::make_equilateral(param begin, param end) {
     return make_shared<equilateral> (w);
 }
 
+void interpreter::do_moveby (param begin, param end) {
+    DEBUGF ('f', range (begin, end));
+    if (end - begin != 1) throw runtime_error ("syntax error");
+    window::setMoveby(stoi(begin[0]));
+}
+
+void interpreter::do_draw_border(param begin, param end){
+    DEBUGF ('f', range (begin, end));
+    if (end - begin != 2) throw runtime_error ("syntax error");
+    rgbcolor color {begin[0]};
+    window::setThickness(stoi(begin[1]));
+
+}

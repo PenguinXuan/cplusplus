@@ -19,10 +19,12 @@ class object {
       shared_ptr<shape> pshape;
       vertex center;
       rgbcolor color;
+
    public:
       object (shared_ptr<shape>, vertex, rgbcolor);
+      bool selected  = false;
       void draw();
-      //void draw_border();
+      void draw_border();
       void move (GLfloat delta_x, GLfloat delta_y, int window__w, int window_h);
 };
 
@@ -50,6 +52,9 @@ class window {
       static vector<object> objects;
       static size_t selected_obj;
       static mouse mus;
+      static int thickness;
+      static rgbcolor border;
+      static int moveby;
    private:
       static void close();
       static void entry (int mouse_entered);
@@ -61,14 +66,17 @@ class window {
       static void passivemotion (int x, int y);
       static void mousefn (int button, int state, int x, int y);
       static void move_selected_object(int x, int y);
-      static void select_object(std::size_t obj) { selected_obj = obj; }
+      static void select_object(std::size_t obj);
    public:
       static void push_back (const object& obj) {
                   objects.push_back (obj); }
-      static void setwidth (int width_) { width = width_; }
-      static void setheight (int height_) { height = height_; }
-      static int getwidth () { return width; }
-      static int getheight() { return height; }
+      static void setWidth (int width_) { width = width_; }
+      static void setHeight (int height_) { height = height_; }
+      static int getWidth () { return width; }
+      static int getHeight() { return height; }
+      static void setThickness (int thickness_) { thickness = thickness_; };
+      static int getThickness () { return thickness; };
+      static void setMoveby (int moveby_) { moveby = moveby_; };
       static void main();
 };
 

@@ -64,10 +64,10 @@ void scan_options (int argc, char** argv) {
             debugflags::setflags (optarg);
             break;
          case 'w':
-            window::setwidth (stoi (optarg));
+             window::setWidth(stoi(optarg));
             break;
          case 'h':
-            window::setheight (stoi (optarg));
+             window::setHeight(stoi(optarg));
             break;
          default:
             complain() << "-" << char (optopt) << ": invalid option"

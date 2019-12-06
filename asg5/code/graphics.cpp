@@ -15,6 +15,9 @@ int window::height = 480; // in pixels
 vector<object> window::objects;
 size_t window::selected_obj = 0;
 mouse window::mus;
+rgbcolor window::border(0xFF, 0x00, 0x00);
+int window::thickness = 4;
+int window::moveby = 4;
 
 // Implementation of object functions.
 object::object (shared_ptr<shape> pshape_, vertex center_,
@@ -25,10 +28,10 @@ object::object (shared_ptr<shape> pshape_, vertex center_,
 void object::draw() {
    pshape->draw (center, color);
 }
-/*
+
 void object::draw_border() {
-   //pshape->draw_border(center, color);
-}*/
+    pshape->draw_border(center, color);
+}
 
 void object::move (GLfloat delta_x, GLfloat delta_y, int window_w, int window_h) {
    if (center.xpos > window_w) center.xpos = 0;
@@ -86,7 +89,12 @@ void window::entry (int mouse_entered) {
 // Called to display the objects in the window.
 void window::display() {
    glClear (GL_COLOR_BUFFER_BIT);
-   for (auto& object: window::objects) object.draw();
+   for (auto& object: window::objects) {
+       object.draw();
+       if (object.selected)  {
+           object.draw_border();
+       }
+   }
    mus.draw();
    glutSwapBuffers();
 }
@@ -116,16 +124,16 @@ void window::keyboard (GLubyte key, int x, int y) {
          window::close();
          break;
       case 'H': case 'h':
-         move_selected_object (-1, 0);
+         move_selected_object (-moveby, 0);
          break;
       case 'J': case 'j':
-         move_selected_object (0, -1);
+         move_selected_object (0, -moveby);
          break;
       case 'K': case 'k':
-         move_selected_object (0, +1);
+         move_selected_object (0, +moveby);
          break;
       case 'L': case 'l':
-         move_selected_object (+1, 0);
+         move_selected_object (+moveby, 0);
          break;
       case 'N': case 'n': case SPACE: case TAB:
          select_object(window::selected_obj + 1);
@@ -150,10 +158,10 @@ void window::special (int key, int x, int y) {
    DEBUGF ('g', "key=" << key << ", x=" << x << ", y=" << y);
    window::mus.set (x, y);
    switch (key) {
-      case GLUT_KEY_LEFT: move_selected_object (-1, 0); break;
-      case GLUT_KEY_DOWN: move_selected_object (0, -1); break;
-      case GLUT_KEY_UP:   move_selected_object (0, +1); break;
-      case GLUT_KEY_RIGHT: move_selected_object (+1, 0); break;
+      case GLUT_KEY_LEFT: move_selected_object (-moveby, 0); break;
+      case GLUT_KEY_DOWN: move_selected_object (0, -moveby); break;
+      case GLUT_KEY_UP:   move_selected_object (0, +moveby); break;
+      case GLUT_KEY_RIGHT: move_selected_object (+moveby, 0); break;
       case GLUT_KEY_F1: select_object (1); break;
       case GLUT_KEY_F2: select_object (2); break;
       case GLUT_KEY_F3: select_object (3); break;
@@ -174,11 +182,18 @@ void window::special (int key, int x, int y) {
 }
 
 void window::move_selected_object(int x, int y) {
-    int window_w = window::getwidth();
-    int window_h = window::getheight();
+    DEBUGF ('g', "x=" << x << ", y=" << y);
+    int window_w = window::getWidth();
+    int window_h = window::getHeight();
     window::objects[window::selected_obj].move(x, y, window_w, window_h);
 }
 
+void window::select_object(std::size_t obj) {
+    DEBUGF ('g', "obj=" << obj);
+    window::objects[window::selected_obj].selected = false;
+    window::selected_obj = obj;
+    window::objects[window::selected_obj].selected = true;
+}
 void window::motion (int x, int y) {
    DEBUGF ('g', "x=" << x << ", y=" << y);
    window::mus.set (x, y);
